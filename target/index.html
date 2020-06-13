@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="app.js"></script>
+  <script type="text/javascript" src="localStorage-ports.js"></script>
+</head>
+
+<body>
+  <div id='app'></div>
+  <script type="text/javascript">
+    // initialize the elm app
+    var elmApp = Elm.Main.init({
+      node: document.getElementById('app'),
+    });
+    addLocalStoragePorts(elmApp);
+
+  </script>
+</body>
+
+</html>
