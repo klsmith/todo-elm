@@ -124,6 +124,7 @@ mainInput attributes item =
         , centerY
         , width shrink
         , myShadow
+        , Border.rounded 6
         ]
         [ Input.text
             ([ onEnter TriggerAddItem
