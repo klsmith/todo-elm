@@ -1,12 +1,10 @@
 module Todo.App exposing (Model, Msg, init, subscriptions, update, view)
 
 import Color
-import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Extra exposing (Document, backgroundColor, borderColor, elText, fontColor, onEnter, toElementColor)
-import Element.Font as Font
-import Element.Input as Input exposing (labelHidden, placeholder)
+import Element as El exposing (Attribute, Element)
+import Element.Border as ElBdr
+import Element.Extra as Elx exposing (Document)
+import Element.Input as Eli exposing (Placeholder)
 import Ports.LocalStorage exposing (addLocalStorageListener, onLocalStorageChange)
 import Todo.Item as Item exposing (Item)
 
@@ -63,37 +61,36 @@ view : Model -> Document Msg
 view model =
     { title = "Todo App"
     , options =
-        [ focusStyle
-            { borderColor = Just <| toElementColor Color.lightCharcoal
-            , backgroundColor = Just <| toElementColor Color.darkCharcoal
+        [ El.focusStyle
+            { borderColor = Just <| Elx.toElementColor Color.lightCharcoal
+            , backgroundColor = Just <| Elx.toElementColor Color.darkCharcoal
             , shadow = Nothing
             }
         ]
     , attributes =
-        [ backgroundColor bgColor
-        , fontColor textColor
+        [ Elx.backgroundColor bgColor
+        , Elx.fontColor textColor
         ]
     , body =
-        column
-            [ width fill
-            , height fill
-            , spacing 16
+        El.column
+            [ El.width El.fill
+            , El.height El.fill
+            , El.spacing 16
             ]
-            ([ mainInput [] model.inputValue
-             ]
-                ++ List.reverse (List.map renderItem model.items)
+            (mainInput [] model.inputValue
+                :: List.reverse (List.map renderItem model.items)
             )
     }
 
 
 renderItem : Item -> Element msg
 renderItem item =
-    row
-        [ paddingXY 8 0
-        , spacing 8
-        , centerX
-        , centerY
-        , width shrink
+    El.row
+        [ El.paddingXY 8 0
+        , El.spacing 8
+        , El.centerX
+        , El.centerY
+        , El.width El.shrink
         ]
         [ importanceBadge (Item.getImportance item)
         , urgencyBadge (Item.getUrgency item)
@@ -103,53 +100,54 @@ renderItem item =
 
 badge : Color.Color -> String -> Element msg
 badge color string =
-    elText
-        [ backgroundColor color
-        , Border.rounded 6
-        , padding 4
-        , centerY
+    Elx.elText
+        [ Elx.backgroundColor color
+        , ElBdr.rounded 6
+        , El.padding 4
+        , El.centerY
         , myShadow
         ]
         string
 
 
+myShadow : El.Attr decorative msg
 myShadow =
-    Border.shadow
+    ElBdr.shadow
         { offset = ( 4, 8 )
         , size = 0
         , blur = 6
-        , color = toElementColor Color.black
+        , color = Elx.toElementColor Color.black
         }
 
 
 mainInput : List (Attribute Msg) -> Maybe Item -> Element Msg
 mainInput attributes item =
-    row
-        [ centerX
-        , centerY
-        , width shrink
+    El.row
+        [ El.centerX
+        , El.centerY
+        , El.width El.shrink
         , myShadow
-        , Border.rounded 6
+        , ElBdr.rounded 6
         ]
-        [ Input.text
-            ([ onEnter TriggerAddItem
-             , backgroundColor Color.charcoal
-             , width (fillPortion 5)
-             , Border.widthEach
+        [ Eli.text
+            ([ Elx.onEnter TriggerAddItem
+             , Elx.backgroundColor Color.charcoal
+             , El.width (El.fillPortion 5)
+             , ElBdr.widthEach
                 { left = 2
                 , top = 2
                 , bottom = 2
                 , right = 1
                 }
-             , borderColor (Color.rgba 0 0 0 0)
-             , Border.roundEach
+             , Elx.borderColor (Color.rgba 0 0 0 0)
+             , ElBdr.roundEach
                 { topLeft = 6
                 , bottomLeft = 6
                 , topRight = 0
                 , bottomRight = 0
                 }
              ]
-                ++ (Maybe.map (onLeft << renderParsed []) item
+                ++ (Maybe.map (El.onLeft << renderParsed []) item
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
                    )
@@ -160,43 +158,43 @@ mainInput attributes item =
                 Maybe.map Item.getRawText item
                     |> Maybe.withDefault ""
             , placeholder = justPlaceholderText "add things to your todo list"
-            , label = labelHidden "main input text box"
+            , label = Eli.labelHidden "main input text box"
             }
-        , Input.button
-            [ backgroundColor Color.darkGreen
-            , Border.widthEach
+        , Eli.button
+            [ Elx.backgroundColor Color.darkGreen
+            , ElBdr.widthEach
                 { left = 1
                 , top = 2
                 , bottom = 2
                 , right = 2
                 }
-            , borderColor (Color.rgba 0 0 0 0)
-            , Border.roundEach { topLeft = 0, topRight = 6, bottomLeft = 0, bottomRight = 6 }
-            , width (fillPortion 1)
-            , height fill
-            , focused
-                [ borderColor Color.darkGreen
-                , fontColor Color.darkGreen
-                , backgroundColor Color.darkCharcoal
+            , Elx.borderColor (Color.rgba 0 0 0 0)
+            , ElBdr.roundEach { topLeft = 0, topRight = 6, bottomLeft = 0, bottomRight = 6 }
+            , El.width (El.fillPortion 1)
+            , El.height El.fill
+            , El.focused
+                [ Elx.borderColor Color.darkGreen
+                , Elx.fontColor Color.darkGreen
+                , Elx.backgroundColor Color.darkCharcoal
                 ]
             ]
             { onPress = Just TriggerAddItem
-            , label = elText [ centerX, centerY, paddingXY 8 0 ] "add"
+            , label = Elx.elText [ El.centerX, El.centerY, El.paddingXY 8 0 ] "add"
             }
         ]
 
 
-justPlaceholderText : String -> Maybe (Input.Placeholder msg)
+justPlaceholderText : String -> Maybe (Placeholder msg)
 justPlaceholderText =
-    Just << placeholder [ fontColor <| Color.lightCharcoal ] << text
+    Just << Eli.placeholder [ Elx.fontColor <| Color.lightCharcoal ] << El.text
 
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
 renderParsed attributes item =
-    row
-        ([ paddingXY 8 0
-         , spacing 8
-         , height fill
+    El.row
+        ([ El.paddingXY 8 0
+         , El.spacing 8
+         , El.height El.fill
          ]
             ++ attributes
         )

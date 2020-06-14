@@ -4,6 +4,7 @@ import Element.Extra
 import Todo.App
 
 
+main : Program () Todo.App.Model Todo.App.Msg
 main =
     Element.Extra.document
         { init = Todo.App.init
