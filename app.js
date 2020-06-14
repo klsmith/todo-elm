@@ -11033,28 +11033,17 @@ var $author$project$Element$Extra$document = function (config) {
 		});
 };
 var $author$project$Ports$LocalStorage$addLocalStorageListener = _Platform_outgoingPort('addLocalStorageListener', $elm$json$Json$Encode$string);
-var $author$project$Todo$Item$Item = F3(
-	function (a, b, c) {
-		return {$: 'Item', a: a, b: b, c: c};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
 	});
-var $author$project$Todo$Item$NoImportance = {$: 'NoImportance'};
-var $author$project$Todo$Item$Whenever = {$: 'Whenever'};
-var $author$project$Todo$Item$extractImp = function (t) {
-	if (t.$ === 'Imp') {
-		var i = t.b;
-		return $elm$core$Maybe$Just(i);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Todo$Item$extractUrg = function (t) {
-	if (t.$ === 'Urg') {
-		var u = t.b;
-		return $elm$core$Maybe$Just(u);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
+var $author$project$Todo$Item$Item = F4(
+	function (a, b, c, d) {
+		return {$: 'Item', a: a, b: b, c: c, d: d};
+	});
+var $author$project$Todo$Importance$NoImportance = {$: 'NoImportance'};
+var $author$project$Todo$Urgency$Whenever = {$: 'Whenever'};
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -11064,7 +11053,15 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Todo$Item$tokenToString = function (token) {
+var $author$project$Todo$Token$toImportance = function (t) {
+	if (t.$ === 'Imp') {
+		var i = t.b;
+		return $elm$core$Maybe$Just(i);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Todo$Token$toString = function (token) {
 	switch (token.$) {
 		case 'Txt':
 			var string = token.a;
@@ -11077,84 +11074,216 @@ var $author$project$Todo$Item$tokenToString = function (token) {
 			return string;
 	}
 };
+var $author$project$Todo$Token$toText = function (t) {
+	if (t.$ === 'Txt') {
+		var s = t.a;
+		return $elm$core$Maybe$Just(s);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Todo$Token$toUrgency = function (t) {
+	if (t.$ === 'Urg') {
+		var u = t.b;
+		return $elm$core$Maybe$Just(u);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $author$project$Todo$Item$parseTokens = function (tokens) {
 	var urg = A2(
 		$elm$core$Maybe$withDefault,
-		$author$project$Todo$Item$Whenever,
+		$author$project$Todo$Urgency$Whenever,
 		$elm$core$List$head(
-			A2($elm$core$List$filterMap, $author$project$Todo$Item$extractUrg, tokens)));
+			A2($elm$core$List$filterMap, $author$project$Todo$Token$toUrgency, tokens)));
+	var txts = A2($elm$core$List$filterMap, $author$project$Todo$Token$toText, tokens);
 	var rawText = A2(
 		$elm$core$String$join,
 		' ',
-		A2($elm$core$List$map, $author$project$Todo$Item$tokenToString, tokens));
+		A2($elm$core$List$map, $author$project$Todo$Token$toString, tokens));
 	var imp = A2(
 		$elm$core$Maybe$withDefault,
-		$author$project$Todo$Item$NoImportance,
+		$author$project$Todo$Importance$NoImportance,
 		$elm$core$List$head(
-			A2($elm$core$List$filterMap, $author$project$Todo$Item$extractImp, tokens)));
-	return $elm$core$String$isEmpty(rawText) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-		A3($author$project$Todo$Item$Item, imp, urg, rawText));
+			A2($elm$core$List$filterMap, $author$project$Todo$Token$toImportance, tokens)));
+	return ($elm$core$List$length(txts) === 1) ? $elm$core$Maybe$Just(
+		A4(
+			$author$project$Todo$Item$Item,
+			imp,
+			urg,
+			$elm$core$String$concat(txts),
+			rawText)) : ($elm$core$String$isEmpty(rawText) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+		A4($author$project$Todo$Item$Item, imp, urg, rawText, rawText)));
 };
-var $author$project$Todo$Item$Asap = {$: 'Asap'};
-var $author$project$Todo$Item$Eventually = {$: 'Eventually'};
-var $author$project$Todo$Item$Imp = F2(
+var $author$project$Todo$Token$Imp = F2(
 	function (a, b) {
 		return {$: 'Imp', a: a, b: b};
 	});
-var $author$project$Todo$Item$Need = {$: 'Need'};
-var $author$project$Todo$Item$Soon = {$: 'Soon'};
-var $author$project$Todo$Item$Txt = function (a) {
+var $author$project$Todo$Token$Txt = function (a) {
 	return {$: 'Txt', a: a};
 };
-var $author$project$Todo$Item$Urg = F2(
+var $author$project$Todo$Token$Urg = F2(
 	function (a, b) {
 		return {$: 'Urg', a: a, b: b};
 	});
-var $author$project$Todo$Item$Want = {$: 'Want'};
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Todo$Token$aggregate = F2(
+	function (token, list) {
+		var rest = A2(
+			$elm$core$Maybe$withDefault,
+			_List_Nil,
+			$elm$core$List$tail(list));
+		var maybeEnd = $elm$core$List$head(list);
+		if (maybeEnd.$ === 'Nothing') {
+			return A2($elm$core$List$cons, token, list);
+		} else {
+			var end = maybeEnd.a;
+			var _v1 = _Utils_Tuple2(token, end);
+			_v1$3:
+			while (true) {
+				if (_v1.a.$ === 'Txt') {
+					switch (_v1.b.$) {
+						case 'Imp':
+							if (_v1.a.a === 'to') {
+								var _v2 = _v1.b;
+								var is = _v2.a;
+								var imp = _v2.b;
+								return A2(
+									$elm$core$List$cons,
+									A2(
+										$author$project$Todo$Token$Imp,
+										A2(
+											$elm$core$String$join,
+											' ',
+											_List_fromArray(
+												[is, 'to'])),
+										imp),
+									rest);
+							} else {
+								break _v1$3;
+							}
+						case 'Txt':
+							if ((_v1.a.a === '') && (_v1.b.a === '')) {
+								return list;
+							} else {
+								var ts = _v1.a.a;
+								var es = _v1.b.a;
+								return A2(
+									$elm$core$List$cons,
+									$author$project$Todo$Token$Txt(
+										A2(
+											$elm$core$String$join,
+											' ',
+											_List_fromArray(
+												[es, ts]))),
+									rest);
+							}
+						default:
+							break _v1$3;
+					}
+				} else {
+					break _v1$3;
+				}
+			}
+			return A2($elm$core$List$cons, token, list);
+		}
+	});
+var $author$project$Todo$Importance$Need = {$: 'Need'};
+var $author$project$Todo$Importance$Want = {$: 'Want'};
+var $elm$core$String$filter = _String_filter;
 var $elm$core$String$toUpper = _String_toUpper;
-var $author$project$Todo$Item$tokenize = function (string) {
-	var upperString = $elm$core$String$toUpper(string);
-	return A2($elm$core$String$contains, ' ', string) ? $elm$core$List$concat(
-		A2(
-			$elm$core$List$map,
-			$author$project$Todo$Item$tokenize,
-			A2($elm$core$String$split, ' ', string))) : ((upperString === 'NEED') ? _List_fromArray(
-		[
-			A2($author$project$Todo$Item$Imp, string, $author$project$Todo$Item$Need)
-		]) : ((upperString === 'WANT') ? _List_fromArray(
-		[
-			A2($author$project$Todo$Item$Imp, string, $author$project$Todo$Item$Want)
-		]) : ((upperString === 'ASAP') ? _List_fromArray(
-		[
-			A2($author$project$Todo$Item$Urg, string, $author$project$Todo$Item$Asap)
-		]) : ((upperString === 'SOON') ? _List_fromArray(
-		[
-			A2($author$project$Todo$Item$Urg, string, $author$project$Todo$Item$Soon)
-		]) : ((upperString === 'EVENTUALLY') ? _List_fromArray(
-		[
-			A2($author$project$Todo$Item$Urg, string, $author$project$Todo$Item$Eventually)
-		]) : ((upperString === 'WHENEVER') ? _List_fromArray(
-		[
-			A2($author$project$Todo$Item$Urg, string, $author$project$Todo$Item$Whenever)
-		]) : _List_fromArray(
-		[
-			$author$project$Todo$Item$Txt(string)
-		])))))));
+var $author$project$Todo$Importance$parse = function (string) {
+	var _v0 = $elm$core$String$toUpper(
+		A2($elm$core$String$filter, $elm$core$Char$isAlphaNum, string));
+	switch (_v0) {
+		case 'NEED':
+			return $elm$core$Maybe$Just($author$project$Todo$Importance$Need);
+		case 'WANT':
+			return $elm$core$Maybe$Just($author$project$Todo$Importance$Want);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
 };
-var $author$project$Todo$Item$parse = function (string) {
-	return $author$project$Todo$Item$parseTokens(
-		$author$project$Todo$Item$tokenize(string));
+var $author$project$Todo$Urgency$Asap = {$: 'Asap'};
+var $author$project$Todo$Urgency$Eventually = {$: 'Eventually'};
+var $author$project$Todo$Urgency$Soon = {$: 'Soon'};
+var $author$project$Todo$Urgency$parse = function (string) {
+	var _v0 = $elm$core$String$toUpper(
+		A2($elm$core$String$filter, $elm$core$Char$isAlphaNum, string));
+	switch (_v0) {
+		case 'ASAP':
+			return $elm$core$Maybe$Just($author$project$Todo$Urgency$Asap);
+		case 'SOON':
+			return $elm$core$Maybe$Just($author$project$Todo$Urgency$Soon);
+		case 'EVENTUALLY':
+			return $elm$core$Maybe$Just($author$project$Todo$Urgency$Eventually);
+		case 'WHENEVER':
+			return $elm$core$Maybe$Just($author$project$Todo$Urgency$Whenever);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
 };
-var $author$project$Todo$App$storageKey = 'io.github.klsmith.todo-elm';
-var $author$project$Todo$App$init = function (_v0) {
+var $author$project$Todo$Token$tokenize = function (string) {
+	if (A2($elm$core$String$contains, ' ', string)) {
+		return $elm$core$List$reverse(
+			A3(
+				$elm$core$List$foldr,
+				$author$project$Todo$Token$aggregate,
+				_List_Nil,
+				$elm$core$List$reverse(
+					$elm$core$List$concat(
+						A2(
+							$elm$core$List$map,
+							$author$project$Todo$Token$tokenize,
+							A2($elm$core$String$split, ' ', string))))));
+	} else {
+		var _v0 = _Utils_Tuple2(
+			$author$project$Todo$Importance$parse(string),
+			$author$project$Todo$Urgency$parse(string));
+		if (_v0.a.$ === 'Just') {
+			var imp = _v0.a.a;
+			return _List_fromArray(
+				[
+					A2($author$project$Todo$Token$Imp, string, imp)
+				]);
+		} else {
+			if (_v0.b.$ === 'Just') {
+				var _v1 = _v0.a;
+				var urg = _v0.b.a;
+				return _List_fromArray(
+					[
+						A2($author$project$Todo$Token$Urg, string, urg)
+					]);
+			} else {
+				var _v2 = _v0.a;
+				var _v3 = _v0.b;
+				return _List_fromArray(
+					[
+						$author$project$Todo$Token$Txt(string)
+					]);
+			}
+		}
+	}
+};
+var $author$project$Todo$Item$parse = A2($elm$core$Basics$composeL, $author$project$Todo$Item$parseTokens, $author$project$Todo$Token$tokenize);
+var $author$project$Main$storageKey = 'io.github.klsmith.todo-elm';
+var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			inputValue: $author$project$Todo$Item$parse('need something asap'),
 			items: _List_Nil
 		},
-		$author$project$Ports$LocalStorage$addLocalStorageListener($author$project$Todo$App$storageKey));
+		$author$project$Ports$LocalStorage$addLocalStorageListener($author$project$Main$storageKey));
 };
-var $author$project$Todo$App$OnStorageChange = function (a) {
+var $author$project$Main$OnStorageChange = function (a) {
 	return {$: 'OnStorageChange', a: a};
 };
 var $elm$json$Json$Decode$andThen = _Json_andThen;
@@ -11184,26 +11313,14 @@ var $author$project$Ports$LocalStorage$onLocalStorageChange = _Platform_incoming
 						$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
 						A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$string)
 					])))));
-var $author$project$Todo$App$subscriptions = function (_v0) {
-	return $author$project$Ports$LocalStorage$onLocalStorageChange($author$project$Todo$App$OnStorageChange);
+var $author$project$Main$subscriptions = function (_v0) {
+	return $author$project$Ports$LocalStorage$onLocalStorageChange($author$project$Main$OnStorageChange);
 };
-var $author$project$Todo$Item$andThenWith = F4(
+var $author$project$Util$andThenCompareWith = F4(
 	function (comparator, a, b, higherOrder) {
 		return _Utils_eq(higherOrder, $elm$core$Basics$EQ) ? A2(comparator, a, b) : higherOrder;
 	});
-var $author$project$Todo$Item$getImportance = function (_v0) {
-	var imp = _v0.a;
-	return imp;
-};
-var $author$project$Todo$Item$getRawText = function (_v0) {
-	var string = _v0.c;
-	return string;
-};
-var $author$project$Todo$Item$getUrgency = function (_v0) {
-	var urg = _v0.b;
-	return urg;
-};
-var $author$project$Todo$Item$impToIndex = function (imp) {
+var $author$project$Todo$Importance$asIndex = function (imp) {
 	switch (imp.$) {
 		case 'NoImportance':
 			return 0;
@@ -11213,14 +11330,14 @@ var $author$project$Todo$Item$impToIndex = function (imp) {
 			return 2;
 	}
 };
-var $author$project$Todo$Item$impCompare = F2(
-	function (impA, impB) {
+var $author$project$Todo$Importance$compare = F2(
+	function (a, b) {
 		return A2(
 			$elm$core$Basics$compare,
-			$author$project$Todo$Item$impToIndex(impA),
-			$author$project$Todo$Item$impToIndex(impB));
+			$author$project$Todo$Importance$asIndex(a),
+			$author$project$Todo$Importance$asIndex(b));
 	});
-var $author$project$Todo$Item$urgToIndex = function (urg) {
+var $author$project$Todo$Urgency$asIndex = function (urg) {
 	switch (urg.$) {
 		case 'Whenever':
 			return 0;
@@ -11234,27 +11351,39 @@ var $author$project$Todo$Item$urgToIndex = function (urg) {
 			return 4;
 	}
 };
-var $author$project$Todo$Item$urgCompare = F2(
-	function (urgA, urgB) {
+var $author$project$Todo$Urgency$compare = F2(
+	function (a, b) {
 		return A2(
 			$elm$core$Basics$compare,
-			$author$project$Todo$Item$urgToIndex(urgA),
-			$author$project$Todo$Item$urgToIndex(urgB));
+			$author$project$Todo$Urgency$asIndex(a),
+			$author$project$Todo$Urgency$asIndex(b));
 	});
+var $author$project$Todo$Item$getImportance = function (_v0) {
+	var imp = _v0.a;
+	return imp;
+};
+var $author$project$Todo$Item$getRawText = function (_v0) {
+	var rawText = _v0.d;
+	return rawText;
+};
+var $author$project$Todo$Item$getUrgency = function (_v0) {
+	var urg = _v0.b;
+	return urg;
+};
 var $author$project$Todo$Item$compare = F2(
 	function (itemA, itemB) {
 		return A4(
-			$author$project$Todo$Item$andThenWith,
+			$author$project$Util$andThenCompareWith,
 			$elm$core$Basics$compare,
 			$author$project$Todo$Item$getRawText(itemA),
 			$author$project$Todo$Item$getRawText(itemB),
 			A4(
-				$author$project$Todo$Item$andThenWith,
-				$author$project$Todo$Item$urgCompare,
+				$author$project$Util$andThenCompareWith,
+				$author$project$Todo$Urgency$compare,
 				$author$project$Todo$Item$getUrgency(itemA),
 				$author$project$Todo$Item$getUrgency(itemB),
 				A2(
-					$author$project$Todo$Item$impCompare,
+					$author$project$Todo$Importance$compare,
 					$author$project$Todo$Item$getImportance(itemA),
 					$author$project$Todo$Item$getImportance(itemB))));
 	});
@@ -11265,7 +11394,7 @@ var $elm$core$List$singleton = function (value) {
 		[value]);
 };
 var $elm$core$List$sortWith = _List_sortWith;
-var $author$project$Todo$App$update = F2(
+var $author$project$Main$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model);
 		switch (_v0.a.$) {
@@ -11310,11 +11439,6 @@ var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
 			'background-color',
 			clr));
 };
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
 var $avh4$elm_color$Color$toRgba = function (_v0) {
 	var r = _v0.a;
@@ -11339,7 +11463,7 @@ var $avh4$elm_color$Color$RgbaSpace = F4(
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
 var $avh4$elm_color$Color$darkCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 46 / 255, 52 / 255, 54 / 255, 1.0);
-var $author$project$Todo$App$bgColor = $avh4$elm_color$Color$darkCharcoal;
+var $author$project$Main$bgColor = $avh4$elm_color$Color$darkCharcoal;
 var $mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
 var $mdgriffith$elm_ui$Internal$Model$asColumn = $mdgriffith$elm_ui$Internal$Model$AsColumn;
 var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
@@ -11390,10 +11514,10 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 };
 var $author$project$Element$Extra$fontColor = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Element$Font$color, $author$project$Element$Extra$toElementColor);
 var $avh4$elm_color$Color$lightCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 136 / 255, 138 / 255, 133 / 255, 1.0);
-var $author$project$Todo$App$OnInputChange = function (a) {
+var $author$project$Main$OnInputChange = function (a) {
 	return {$: 'OnInputChange', a: a};
 };
-var $author$project$Todo$App$TriggerAddItem = {$: 'TriggerAddItem'};
+var $author$project$Main$TriggerAddItem = {$: 'TriggerAddItem'};
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -11735,7 +11859,7 @@ var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
 		return {$: 'Placeholder', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
-var $author$project$Todo$App$justPlaceholderText = A2(
+var $author$project$Main$justPlaceholderText = A2(
 	$elm$core$Basics$composeL,
 	A2(
 		$elm$core$Basics$composeL,
@@ -11775,7 +11899,7 @@ var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
 			'box-shadow',
 			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
 };
-var $author$project$Todo$App$myShadow = $mdgriffith$elm_ui$Element$Border$shadow(
+var $author$project$Main$myShadow = $mdgriffith$elm_ui$Element$Border$shadow(
 	{
 		blur: 6,
 		color: $author$project$Element$Extra$toElementColor($avh4$elm_color$Color$black),
@@ -12198,7 +12322,7 @@ var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 			'border-radius',
 			$elm$core$String$fromInt(radius) + 'px'));
 };
-var $author$project$Todo$App$badge = F2(
+var $author$project$Main$badge = F2(
 	function (color, string) {
 		return A2(
 			$author$project$Element$Extra$elText,
@@ -12208,20 +12332,20 @@ var $author$project$Todo$App$badge = F2(
 					$mdgriffith$elm_ui$Element$Border$rounded(6),
 					$mdgriffith$elm_ui$Element$padding(4),
 					$mdgriffith$elm_ui$Element$centerY,
-					$author$project$Todo$App$myShadow
+					$author$project$Main$myShadow
 				]),
 			string);
 	});
 var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
 var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
-var $author$project$Todo$App$importanceBadge = function (importance) {
+var $author$project$Main$importanceBadge = function (importance) {
 	switch (importance.$) {
 		case 'Need':
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$red, 'NEED');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$red, 'NEED');
 		case 'Want':
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$orange, 'WANT');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$orange, 'WANT');
 		default:
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$darkGreen, 'NOT IMPORTANT');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$darkGreen, 'NOT IMPORTANT');
 	}
 };
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
@@ -12264,21 +12388,21 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x));
 };
 var $avh4$elm_color$Color$darkYellow = A4($avh4$elm_color$Color$RgbaSpace, 196 / 255, 160 / 255, 0 / 255, 1.0);
-var $author$project$Todo$App$urgencyBadge = function (urgency) {
+var $author$project$Main$urgencyBadge = function (urgency) {
 	switch (urgency.$) {
 		case 'Asap':
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$red, 'ASAP');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$red, 'ASAP');
 		case 'Soon':
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$orange, 'SOON');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$orange, 'SOON');
 		case 'Deadline':
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$orange, 'DEADLINE: --/--/--');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$orange, 'DEADLINE: --/--/--');
 		case 'Eventually':
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$darkYellow, 'EVENTUALLY');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$darkYellow, 'EVENTUALLY');
 		default:
-			return A2($author$project$Todo$App$badge, $avh4$elm_color$Color$darkGreen, 'WHENEVER');
+			return A2($author$project$Main$badge, $avh4$elm_color$Color$darkGreen, 'WHENEVER');
 	}
 };
-var $author$project$Todo$App$renderParsed = F2(
+var $author$project$Main$renderParsed = F2(
 	function (attributes, item) {
 		return A2(
 			$mdgriffith$elm_ui$Element$row,
@@ -12292,9 +12416,9 @@ var $author$project$Todo$App$renderParsed = F2(
 				attributes),
 			_List_fromArray(
 				[
-					$author$project$Todo$App$importanceBadge(
+					$author$project$Main$importanceBadge(
 					$author$project$Todo$Item$getImportance(item)),
-					$author$project$Todo$App$urgencyBadge(
+					$author$project$Main$urgencyBadge(
 					$author$project$Todo$Item$getUrgency(item))
 				]));
 	});
@@ -13193,7 +13317,7 @@ var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
 			bottom,
 			left));
 };
-var $author$project$Todo$App$mainInput = F2(
+var $author$project$Main$mainInput = F2(
 	function (attributes, item) {
 		return A2(
 			$mdgriffith$elm_ui$Element$row,
@@ -13202,7 +13326,7 @@ var $author$project$Todo$App$mainInput = F2(
 					$mdgriffith$elm_ui$Element$centerX,
 					$mdgriffith$elm_ui$Element$centerY,
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					$author$project$Todo$App$myShadow,
+					$author$project$Main$myShadow,
 					$mdgriffith$elm_ui$Element$Border$rounded(6)
 				]),
 			_List_fromArray(
@@ -13212,7 +13336,7 @@ var $author$project$Todo$App$mainInput = F2(
 					_Utils_ap(
 						_List_fromArray(
 							[
-								$author$project$Element$Extra$onEnter($author$project$Todo$App$TriggerAddItem),
+								$author$project$Element$Extra$onEnter($author$project$Main$TriggerAddItem),
 								$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$charcoal),
 								$mdgriffith$elm_ui$Element$width(
 								$mdgriffith$elm_ui$Element$fillPortion(5)),
@@ -13235,13 +13359,13 @@ var $author$project$Todo$App$mainInput = F2(
 										A2(
 											$elm$core$Basics$composeL,
 											$mdgriffith$elm_ui$Element$onLeft,
-											$author$project$Todo$App$renderParsed(_List_Nil)),
+											$author$project$Main$renderParsed(_List_Nil)),
 										item))),
 							attributes)),
 					{
 						label: $mdgriffith$elm_ui$Element$Input$labelHidden('main input text box'),
-						onChange: $author$project$Todo$App$OnInputChange,
-						placeholder: $author$project$Todo$App$justPlaceholderText('add things to your todo list'),
+						onChange: $author$project$Main$OnInputChange,
+						placeholder: $author$project$Main$justPlaceholderText('add things to your todo list'),
 						text: A2(
 							$elm$core$Maybe$withDefault,
 							'',
@@ -13279,12 +13403,16 @@ var $author$project$Todo$App$mainInput = F2(
 									A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0)
 								]),
 							'add'),
-						onPress: $elm$core$Maybe$Just($author$project$Todo$App$TriggerAddItem)
+						onPress: $elm$core$Maybe$Just($author$project$Main$TriggerAddItem)
 					})
 				]));
 	});
 var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
-var $author$project$Todo$App$renderItem = function (item) {
+var $author$project$Todo$Item$getDetails = function (_v0) {
+	var details = _v0.c;
+	return details;
+};
+var $author$project$Main$renderItem = function (item) {
 	return A2(
 		$mdgriffith$elm_ui$Element$row,
 		_List_fromArray(
@@ -13297,24 +13425,24 @@ var $author$project$Todo$App$renderItem = function (item) {
 			]),
 		_List_fromArray(
 			[
-				$author$project$Todo$App$importanceBadge(
+				$author$project$Main$importanceBadge(
 				$author$project$Todo$Item$getImportance(item)),
-				$author$project$Todo$App$urgencyBadge(
+				$author$project$Main$urgencyBadge(
 				$author$project$Todo$Item$getUrgency(item)),
 				A2(
-				$author$project$Todo$App$badge,
+				$author$project$Main$badge,
 				$avh4$elm_color$Color$blue,
-				$author$project$Todo$Item$getRawText(item))
+				$author$project$Todo$Item$getDetails(item))
 			]));
 };
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
-var $author$project$Todo$App$textColor = $avh4$elm_color$Color$white;
-var $author$project$Todo$App$view = function (model) {
+var $author$project$Main$textColor = $avh4$elm_color$Color$white;
+var $author$project$Main$view = function (model) {
 	return {
 		attributes: _List_fromArray(
 			[
-				$author$project$Element$Extra$backgroundColor($author$project$Todo$App$bgColor),
-				$author$project$Element$Extra$fontColor($author$project$Todo$App$textColor)
+				$author$project$Element$Extra$backgroundColor($author$project$Main$bgColor),
+				$author$project$Element$Extra$fontColor($author$project$Main$textColor)
 			]),
 		body: A2(
 			$mdgriffith$elm_ui$Element$column,
@@ -13324,13 +13452,11 @@ var $author$project$Todo$App$view = function (model) {
 					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$spacing(16)
 				]),
-			_Utils_ap(
-				_List_fromArray(
-					[
-						A2($author$project$Todo$App$mainInput, _List_Nil, model.inputValue)
-					]),
+			A2(
+				$elm$core$List$cons,
+				A2($author$project$Main$mainInput, _List_Nil, model.inputValue),
 				$elm$core$List$reverse(
-					A2($elm$core$List$map, $author$project$Todo$App$renderItem, model.items)))),
+					A2($elm$core$List$map, $author$project$Main$renderItem, model.items)))),
 		options: _List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$focusStyle(
@@ -13346,6 +13472,6 @@ var $author$project$Todo$App$view = function (model) {
 	};
 };
 var $author$project$Main$main = $author$project$Element$Extra$document(
-	{init: $author$project$Todo$App$init, subscriptions: $author$project$Todo$App$subscriptions, update: $author$project$Todo$App$update, view: $author$project$Todo$App$view});
+	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
