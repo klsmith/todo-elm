@@ -123,7 +123,13 @@ justPlaceholderText =
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
 renderParsed attributes item =
-    row ([ paddingXY 8 16, spacing 8, height fill ] ++ attributes)
+    row
+        ([ paddingXY 8 0
+         , spacing 8
+         , height fill
+         ]
+            ++ attributes
+        )
         [ renderImportance <| Item.getImportance item
         , renderUrgency <| Item.getUrgency item
         ]
