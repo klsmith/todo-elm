@@ -100,14 +100,17 @@ aggregate token list =
             token :: list
 
         Just end ->
-            case ( token, end ) of
+            case ( end, token ) of
                 ( Txt "", Txt "" ) ->
                     list
 
-                ( Txt "to", Imp is imp ) ->
+                ( Imp is imp, Txt "to" ) ->
                     Imp (String.join " " [ is, "to" ]) imp :: rest
 
-                ( Txt ts, Txt es ) ->
+                ( Txt "really", Imp is imp ) ->
+                    Imp (String.join " " [ "really", is ]) imp :: rest
+
+                ( Txt es, Txt ts ) ->
                     Txt (String.join " " [ es, ts ]) :: rest
 
                 ( _, _ ) ->

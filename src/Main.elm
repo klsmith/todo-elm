@@ -154,10 +154,10 @@ mainInput attributes item =
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
                    )
-                -- ++ (Maybe.map (El.above << debugTokens) item
-                --         |> Maybe.map List.singleton
-                --         |> Maybe.withDefault []
-                --    )
+                ++ (Maybe.map (El.above << debugTokens) item
+                        |> Maybe.map List.singleton
+                        |> Maybe.withDefault []
+                   )
                 ++ attributes
             )
             { onChange = OnInputChange
