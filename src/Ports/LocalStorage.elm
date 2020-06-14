@@ -1,4 +1,8 @@
-port module Ports.LocalStorage exposing (..)
+port module Ports.LocalStorage exposing
+    ( addLocalStorageListener
+    , onLocalStorageChange
+    , saveToLocalStorage
+    )
 
 
 port saveToLocalStorage :

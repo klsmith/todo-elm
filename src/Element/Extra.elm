@@ -7,13 +7,10 @@ module Element.Extra exposing
     , toElementColor
     )
 
-import Browser exposing (UrlRequest)
-import Browser.Navigation as Nav
+import Browser
 import Color exposing (Color)
 import Element exposing (Attribute, Element, Option, layoutWith)
-import Html
 import Html.Events
-import Json.Decode as Decode exposing (Decoder)
 import Keyboard.Event exposing (KeyboardEvent, considerKeyboardEvent)
 import Keyboard.Key as Key exposing (Key)
 

@@ -9,7 +9,6 @@ module Todo.Item exposing
     , parse
     )
 
-import Set
 import Time exposing (Posix)
 
 
@@ -31,11 +30,6 @@ type Urgency
 
 type alias RawText =
     String
-
-
-type ParseResult
-    = Partial (List Token)
-    | Complete Item
 
 
 type Token

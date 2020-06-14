@@ -1,6 +1,5 @@
 module Todo.App exposing (Model, Msg, init, subscriptions, update, view)
 
-import Browser
 import Color
 import Element exposing (..)
 import Element.Background as Background
@@ -8,9 +7,7 @@ import Element.Border as Border
 import Element.Extra exposing (Document, elText, toElementColor)
 import Element.Font as Font
 import Element.Input as Input exposing (labelHidden, placeholder)
-import Parser exposing (DeadEnd)
-import Ports.LocalStorage exposing (..)
-import RemoteData exposing (RemoteData)
+import Ports.LocalStorage exposing (addLocalStorageListener, onLocalStorageChange)
 import Todo.Item as Item exposing (Item)
 
 
@@ -21,10 +18,6 @@ import Todo.Item as Item exposing (Item)
 type alias Model =
     { inputValue : Maybe Item
     }
-
-
-type alias StoredData a =
-    RemoteData Never a
 
 
 type alias KeyValue =
@@ -64,16 +57,6 @@ textColor =
     toElementColor Color.white
 
 
-impAcc : Element.Color
-impAcc =
-    toElementColor Color.lightPurple
-
-
-urgAcc : Element.Color
-urgAcc =
-    toElementColor Color.blue
-
-
 view : Model -> Document Msg
 view model =
     { title = "Todo App"
@@ -83,7 +66,7 @@ view model =
         , Font.color textColor
         ]
     , body =
-        column [ centerX, centerY ]
+        column [ width fill, height fill ]
             [ mainInput [] model.inputValue
             ]
     }
@@ -91,92 +74,103 @@ view model =
 
 mainInput : List (Attribute Msg) -> Maybe Item -> Element Msg
 mainInput attributes item =
-    Input.multiline
-        ([ Background.color bgColor
-         ]
-            ++ (Maybe.map (below << renderParsed []) item
-                    |> Maybe.map List.singleton
-                    |> Maybe.withDefault []
-               )
-            ++ attributes
-        )
-        { onChange = OnInputChange
-        , text =
-            Maybe.map Item.getRawText item
-                |> Maybe.withDefault ""
-        , placeholder = justPlaceholderText "add things to your todo list"
-        , label = labelHidden "main input text box"
-        , spellcheck = True
-        }
+    row
+        [ centerX
+        , centerY
+        , width shrink
+        ]
+        [ Input.text
+            ([ Background.color bgColor
+             , width (fillPortion 5)
+             , Border.roundEach
+                { topLeft = 6
+                , topRight = 0
+                , bottomLeft = 6
+                , bottomRight = 0
+                }
+             ]
+                ++ (Maybe.map (below << renderParsed []) item
+                        |> Maybe.map List.singleton
+                        |> Maybe.withDefault []
+                   )
+                ++ attributes
+            )
+            { onChange = OnInputChange
+            , text =
+                Maybe.map Item.getRawText item
+                    |> Maybe.withDefault ""
+            , placeholder = justPlaceholderText "add things to your todo list"
+            , label = labelHidden "main input text box"
+            }
+        , Input.button
+            [ Background.color (toElementColor Color.green)
+            , Border.color (toElementColor Color.darkGray)
+            , Border.widthEach { bottom = 1, left = 1, right = 1, top = 1 }
+            , Border.roundEach { topLeft = 0, topRight = 6, bottomLeft = 0, bottomRight = 6 }
+            , width (fillPortion 1)
+            , height fill
+            ]
+            { onPress = Nothing
+            , label = elText [ centerX, centerY, paddingXY 8 0 ] "add"
+            }
+        ]
 
 
+justPlaceholderText : String -> Maybe (Input.Placeholder msg)
 justPlaceholderText =
     Just << placeholder [] << text
 
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
 renderParsed attributes item =
-    row [ paddingXY 8 16, spacing 8 ]
+    row ([ paddingXY 8 16, spacing 8 ] ++ attributes)
         [ renderImportance <| Item.getImportance item
         , renderUrgency <| Item.getUrgency item
-        , text <| Debug.toString <| Item.getRawText item
         ]
 
 
 renderImportance : Item.Importance -> Element msg
 renderImportance importance =
-    case importance of
-        Item.Need ->
-            elText
-                [ Background.color (toElementColor Color.red)
-                , Border.rounded 6
-                , padding 4
-                ]
-                "NEED"
+    let
+        ( colorToUse, textToDisplay ) =
+            case importance of
+                Item.Need ->
+                    ( Color.red, "NEED" )
 
-        Item.Want ->
-            elText
-                [ Background.color (toElementColor Color.orange)
-                , Border.rounded 6
-                , padding 4
-                ]
-                "WANT"
+                Item.Want ->
+                    ( Color.orange, "WANT" )
 
-        Item.NoImportance ->
-            elText
-                [ Background.color (toElementColor Color.green)
-                , Border.rounded 6
-                , padding 4
-                ]
-                "NONE"
+                Item.NoImportance ->
+                    ( Color.green, "NOT IMPORTANT" )
+    in
+    elText
+        [ Background.color (toElementColor colorToUse)
+        , Border.rounded 6
+        , padding 4
+        ]
+        textToDisplay
 
 
 renderUrgency : Item.Urgency -> Element msg
 renderUrgency urgency =
-    case urgency of
-        Item.Asap ->
-            elText
-                [ Background.color (toElementColor Color.red)
-                , Border.rounded 6
-                , padding 4
-                ]
-                "ASAP"
+    let
+        ( colorToUse, textToDisplay ) =
+            case urgency of
+                Item.Asap ->
+                    ( Color.red, "ASAP" )
 
-        Item.Deadline posix ->
-            elText
-                [ Background.color (toElementColor Color.orange)
-                , Border.rounded 6
-                , padding 4
-                ]
-                "DEADLINE: --/--/--"
+                Item.Deadline _ ->
+                    ( Color.orange, "DEADLINE: --/--/--" )
 
-        Item.Whenever ->
-            elText
-                [ Background.color (toElementColor Color.green)
-                , Border.rounded 6
-                , padding 4
-                ]
-                "WHENEVER"
+                Item.Whenever ->
+                    ( Color.green, "WHENEVER" )
+    in
+    elText
+        [ Background.color (toElementColor colorToUse)
+        , Border.rounded 6
+        , padding 4
+        ]
+        textToDisplay
 
 
 
@@ -184,7 +178,7 @@ renderUrgency urgency =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     onLocalStorageChange OnStorageChange
 
 
