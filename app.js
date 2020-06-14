@@ -11295,6 +11295,11 @@ var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
+var $mdgriffith$elm_ui$Internal$Model$FocusStyleOption = function (a) {
+	return {$: 'FocusStyleOption', a: a};
+};
+var $mdgriffith$elm_ui$Element$focusStyle = $mdgriffith$elm_ui$Internal$Model$FocusStyleOption;
+var $avh4$elm_color$Color$lightCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 136 / 255, 138 / 255, 133 / 255, 1.0);
 var $author$project$Todo$App$OnInputChange = function (a) {
 	return {$: 'OnInputChange', a: a};
 };
@@ -11469,7 +11474,6 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
-var $avh4$elm_color$Color$darkGray = A4($avh4$elm_color$Color$RgbaSpace, 186 / 255, 189 / 255, 182 / 255, 1.0);
 var $avh4$elm_color$Color$darkGreen = A4($avh4$elm_color$Color$RgbaSpace, 78 / 255, 154 / 255, 6 / 255, 1.0);
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
@@ -11516,12 +11520,49 @@ var $author$project$Todo$App$justPlaceholderText = A2(
 	A2(
 		$elm$core$Basics$composeL,
 		$elm$core$Maybe$Just,
-		$mdgriffith$elm_ui$Element$Input$placeholder(_List_Nil)),
+		$mdgriffith$elm_ui$Element$Input$placeholder(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$color(
+					$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$lightCharcoal))
+				]))),
 	$mdgriffith$elm_ui$Element$text);
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
 var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				shadow.inset ? 'box-inset' : 'box-',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.a) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.b) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.blur) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.size) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$formatColorClass(shadow.color)
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Flag$shadows = $mdgriffith$elm_ui$Internal$Flag$flag(19);
+var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
+	var shade = {blur: almostShade.blur, color: almostShade.color, inset: false, offset: almostShade.offset, size: almostShade.size};
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$shadows,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			$mdgriffith$elm_ui$Internal$Model$boxShadowClass(shade),
+			'box-shadow',
+			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
+};
+var $author$project$Todo$App$myShadow = $mdgriffith$elm_ui$Element$Border$shadow(
+	{
+		blur: 6,
+		color: $author$project$Element$Extra$toElementColor($avh4$elm_color$Color$black),
+		offset: _Utils_Tuple2(4, 8),
+		size: 0
+	});
 var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Enter = {$: 'Enter'};
 var $Gizra$elm_keyboard_event$Keyboard$Event$KeyboardEvent = F7(
 	function (altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey) {
@@ -11973,7 +12014,8 @@ var $author$project$Todo$App$renderImportance = function (importance) {
 				$author$project$Element$Extra$toElementColor(colorToUse)),
 				$mdgriffith$elm_ui$Element$Border$rounded(6),
 				$mdgriffith$elm_ui$Element$padding(4),
-				$mdgriffith$elm_ui$Element$centerY
+				$mdgriffith$elm_ui$Element$centerY,
+				$author$project$Todo$App$myShadow
 			]),
 		textToDisplay);
 };
@@ -11998,7 +12040,8 @@ var $author$project$Todo$App$renderUrgency = function (urgency) {
 				$author$project$Element$Extra$toElementColor(colorToUse)),
 				$mdgriffith$elm_ui$Element$Border$rounded(6),
 				$mdgriffith$elm_ui$Element$padding(4),
-				$mdgriffith$elm_ui$Element$centerY
+				$mdgriffith$elm_ui$Element$centerY,
+				$author$project$Todo$App$myShadow
 			]),
 		textToDisplay);
 };
@@ -12935,7 +12978,8 @@ var $author$project$Todo$App$mainInput = F2(
 				[
 					$mdgriffith$elm_ui$Element$centerX,
 					$mdgriffith$elm_ui$Element$centerY,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					$author$project$Todo$App$myShadow
 				]),
 			_List_fromArray(
 				[
@@ -12949,7 +12993,9 @@ var $author$project$Todo$App$mainInput = F2(
 								$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$charcoal)),
 								$mdgriffith$elm_ui$Element$width(
 								$mdgriffith$elm_ui$Element$fillPortion(5)),
-								$mdgriffith$elm_ui$Element$Border$width(0),
+								$mdgriffith$elm_ui$Element$Border$width(1),
+								$mdgriffith$elm_ui$Element$Border$color(
+								A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
 								$mdgriffith$elm_ui$Element$Border$roundEach(
 								{bottomLeft: 6, bottomRight: 0, topLeft: 6, topRight: 0})
 							]),
@@ -12983,9 +13029,9 @@ var $author$project$Todo$App$mainInput = F2(
 						[
 							$mdgriffith$elm_ui$Element$Background$color(
 							$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkGreen)),
+							$mdgriffith$elm_ui$Element$Border$width(1),
 							$mdgriffith$elm_ui$Element$Border$color(
-							$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkGray)),
-							$mdgriffith$elm_ui$Element$Border$width(0),
+							A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
 							$mdgriffith$elm_ui$Element$Border$roundEach(
 							{bottomLeft: 0, bottomRight: 6, topLeft: 0, topRight: 6}),
 							$mdgriffith$elm_ui$Element$width(
@@ -13023,8 +13069,18 @@ var $author$project$Todo$App$renderItem = function (item) {
 				$author$project$Todo$Item$getImportance(item)),
 				$author$project$Todo$App$renderUrgency(
 				$author$project$Todo$Item$getUrgency(item)),
-				$mdgriffith$elm_ui$Element$text(
-				'\"' + ($author$project$Todo$Item$getRawText(item) + '\"'))
+				A2(
+				$author$project$Element$Extra$elText,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Background$color(
+						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$charcoal)),
+						$mdgriffith$elm_ui$Element$Border$rounded(6),
+						$mdgriffith$elm_ui$Element$padding(4),
+						$mdgriffith$elm_ui$Element$centerY,
+						$author$project$Todo$App$myShadow
+					]),
+				$author$project$Todo$Item$getRawText(item))
 			]));
 };
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
@@ -13050,7 +13106,17 @@ var $author$project$Todo$App$view = function (model) {
 						A2($author$project$Todo$App$mainInput, _List_Nil, model.inputValue)
 					]),
 				A2($elm$core$List$map, $author$project$Todo$App$renderItem, model.items))),
-		options: _List_Nil,
+		options: _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$focusStyle(
+				{
+					backgroundColor: $elm$core$Maybe$Just(
+						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkCharcoal)),
+					borderColor: $elm$core$Maybe$Just(
+						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$lightCharcoal)),
+					shadow: $elm$core$Maybe$Nothing
+				})
+			]),
 		title: 'Todo App'
 	};
 };
