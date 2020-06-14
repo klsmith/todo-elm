@@ -62,7 +62,13 @@ textColor =
 view : Model -> Document Msg
 view model =
     { title = "Todo App"
-    , options = []
+    , options =
+        [ focusStyle
+            { borderColor = Just <| toElementColor Color.lightCharcoal
+            , backgroundColor = Just <| toElementColor Color.darkCharcoal
+            , shadow = Nothing
+            }
+        ]
     , attributes =
         [ Background.color bgColor
         , Font.color textColor
@@ -91,8 +97,24 @@ renderItem item =
         ]
         [ renderImportance <| Item.getImportance item
         , renderUrgency <| Item.getUrgency item
-        , text ("\"" ++ Item.getRawText item ++ "\"")
+        , elText
+            [ Background.color (toElementColor Color.charcoal)
+            , Border.rounded 6
+            , padding 4
+            , centerY
+            , myShadow
+            ]
+            (Item.getRawText item)
         ]
+
+
+myShadow =
+    Border.shadow
+        { offset = ( 4, 8 )
+        , size = 0
+        , blur = 6
+        , color = toElementColor Color.black
+        }
 
 
 mainInput : List (Attribute Msg) -> Maybe Item -> Element Msg
@@ -101,12 +123,14 @@ mainInput attributes item =
         [ centerX
         , centerY
         , width shrink
+        , myShadow
         ]
         [ Input.text
             ([ onEnter TriggerAddItem
              , Background.color (toElementColor Color.charcoal)
              , width (fillPortion 5)
-             , Border.width 0
+             , Border.width 1
+             , Border.color (Element.rgba 0 0 0 0)
              , Border.roundEach
                 { topLeft = 6
                 , bottomLeft = 6
@@ -129,8 +153,8 @@ mainInput attributes item =
             }
         , Input.button
             [ Background.color (toElementColor Color.darkGreen)
-            , Border.color (toElementColor Color.darkGray)
-            , Border.width 0
+            , Border.width 1
+            , Border.color (Element.rgba 0 0 0 0)
             , Border.roundEach { topLeft = 0, topRight = 6, bottomLeft = 0, bottomRight = 6 }
             , width (fillPortion 1)
             , height fill
@@ -143,7 +167,7 @@ mainInput attributes item =
 
 justPlaceholderText : String -> Maybe (Input.Placeholder msg)
 justPlaceholderText =
-    Just << placeholder [] << text
+    Just << placeholder [ Font.color <| toElementColor Color.lightCharcoal ] << text
 
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
@@ -179,6 +203,7 @@ renderImportance importance =
         , Border.rounded 6
         , padding 4
         , centerY
+        , myShadow
         ]
         textToDisplay
 
@@ -202,6 +227,7 @@ renderUrgency urgency =
         , Border.rounded 6
         , padding 4
         , centerY
+        , myShadow
         ]
         textToDisplay
 
