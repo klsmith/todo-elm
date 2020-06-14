@@ -4,7 +4,7 @@ import Color
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Extra exposing (Document, elText, toElementColor)
+import Element.Extra exposing (Document, elText, onEnter, toElementColor)
 import Element.Font as Font
 import Element.Input as Input exposing (labelHidden, placeholder)
 import Ports.LocalStorage exposing (addLocalStorageListener, onLocalStorageChange)
@@ -17,6 +17,7 @@ import Todo.Item as Item exposing (Item)
 
 type alias Model =
     { inputValue : Maybe Item
+    , items : List Item
     }
 
 
@@ -33,6 +34,7 @@ type alias KeyValue =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { inputValue = Item.parse "need something asap"
+      , items = []
       }
     , addLocalStorageListener storageKey
     )
@@ -66,10 +68,31 @@ view model =
         , Font.color textColor
         ]
     , body =
-        column [ width fill, height fill ]
-            [ mainInput [] model.inputValue
+        column
+            [ width fill
+            , height fill
+            , spacing 16
             ]
+            ([ mainInput [] model.inputValue
+             ]
+                ++ List.map renderItem model.items
+            )
     }
+
+
+renderItem : Item -> Element msg
+renderItem item =
+    row
+        [ paddingXY 8 0
+        , spacing 8
+        , centerX
+        , centerY
+        , width shrink
+        ]
+        [ renderImportance <| Item.getImportance item
+        , renderUrgency <| Item.getUrgency item
+        , text ("\"" ++ Item.getRawText item ++ "\"")
+        ]
 
 
 mainInput : List (Attribute Msg) -> Maybe Item -> Element Msg
@@ -80,12 +103,14 @@ mainInput attributes item =
         , width shrink
         ]
         [ Input.text
-            ([ Background.color bgColor
+            ([ onEnter TriggerAddItem
+             , Background.color (toElementColor Color.charcoal)
              , width (fillPortion 5)
+             , Border.width 0
              , Border.roundEach
                 { topLeft = 6
-                , topRight = 0
                 , bottomLeft = 6
+                , topRight = 0
                 , bottomRight = 0
                 }
              ]
@@ -103,14 +128,14 @@ mainInput attributes item =
             , label = labelHidden "main input text box"
             }
         , Input.button
-            [ Background.color (toElementColor Color.green)
+            [ Background.color (toElementColor Color.darkGreen)
             , Border.color (toElementColor Color.darkGray)
-            , Border.widthEach { bottom = 1, left = 1, right = 1, top = 1 }
+            , Border.width 0
             , Border.roundEach { topLeft = 0, topRight = 6, bottomLeft = 0, bottomRight = 6 }
             , width (fillPortion 1)
             , height fill
             ]
-            { onPress = Nothing
+            { onPress = Just TriggerAddItem
             , label = elText [ centerX, centerY, paddingXY 8 0 ] "add"
             }
         ]
@@ -147,7 +172,7 @@ renderImportance importance =
                     ( Color.orange, "WANT" )
 
                 Item.NoImportance ->
-                    ( Color.green, "NOT IMPORTANT" )
+                    ( Color.darkGreen, "NOT IMPORTANT" )
     in
     elText
         [ Background.color (toElementColor colorToUse)
@@ -170,7 +195,7 @@ renderUrgency urgency =
                     ( Color.orange, "DEADLINE: --/--/--" )
 
                 Item.Whenever ->
-                    ( Color.green, "WHENEVER" )
+                    ( Color.darkGreen, "WHENEVER" )
     in
     elText
         [ Background.color (toElementColor colorToUse)
@@ -197,6 +222,7 @@ subscriptions _ =
 type Msg
     = OnInputChange String
     | OnStorageChange KeyValue
+    | TriggerAddItem
 
 
 
@@ -209,6 +235,18 @@ update msg model =
         ( OnInputChange newValue, _ ) ->
             ( { model
                 | inputValue = Item.parse newValue
+              }
+            , Cmd.none
+            )
+
+        ( TriggerAddItem, _ ) ->
+            ( { model
+                | inputValue = Nothing
+                , items =
+                    (Maybe.map List.singleton model.inputValue
+                        |> Maybe.withDefault []
+                    )
+                        ++ model.items
               }
             , Cmd.none
             )
