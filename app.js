@@ -11141,7 +11141,8 @@ var $author$project$Todo$App$storageKey = 'io.github.klsmith.todo-elm';
 var $author$project$Todo$App$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			inputValue: $author$project$Todo$Item$parse('need something asap')
+			inputValue: $author$project$Todo$Item$parse('need something asap'),
+			items: _List_Nil
 		},
 		$author$project$Ports$LocalStorage$addLocalStorageListener($author$project$Todo$App$storageKey));
 };
@@ -11175,25 +11176,45 @@ var $author$project$Ports$LocalStorage$onLocalStorageChange = _Platform_incoming
 						$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
 						A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$string)
 					])))));
-var $author$project$Todo$App$subscriptions = function (model) {
+var $author$project$Todo$App$subscriptions = function (_v0) {
 	return $author$project$Ports$LocalStorage$onLocalStorageChange($author$project$Todo$App$OnStorageChange);
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
 var $author$project$Todo$App$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model);
-		if (_v0.a.$ === 'OnInputChange') {
-			var newValue = _v0.a.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						inputValue: $author$project$Todo$Item$parse(newValue)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		switch (_v0.a.$) {
+			case 'OnInputChange':
+				var newValue = _v0.a.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							inputValue: $author$project$Todo$Item$parse(newValue)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'TriggerAddItem':
+				var _v1 = _v0.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							inputValue: $elm$core$Maybe$Nothing,
+							items: _Utils_ap(
+								A2(
+									$elm$core$Maybe$withDefault,
+									_List_Nil,
+									A2($elm$core$Maybe$map, $elm$core$List$singleton, model.inputValue)),
+								model.items)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $avh4$elm_color$Color$RgbaSpace = F4(
@@ -11220,16 +11241,6 @@ var $author$project$Element$Extra$toElementColor = function (color) {
 		$avh4$elm_color$Color$toRgba(color));
 };
 var $author$project$Todo$App$bgColor = $author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkCharcoal);
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
-var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
-var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
-	return {$: 'AlignY', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
-var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
 var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -11280,31 +11291,217 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
+	return {$: 'Fill', a: a};
+};
+var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
 var $author$project$Todo$App$OnInputChange = function (a) {
 	return {$: 'OnInputChange', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$Below = {$: 'Below'};
-var $mdgriffith$elm_ui$Internal$Model$Nearby = F2(
-	function (a, b) {
-		return {$: 'Nearby', a: a, b: b};
+var $author$project$Todo$App$TriggerAddItem = {$: 'TriggerAddItem'};
+var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
+var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
+	return {$: 'Describe', a: a};
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
 	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
-var $mdgriffith$elm_ui$Element$createNearby = F2(
-	function (loc, element) {
-		if (element.$ === 'Empty') {
-			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
-		} else {
-			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
-		}
-	});
-var $mdgriffith$elm_ui$Element$below = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Below, element);
+var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
+	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
+		var _v1 = attr.b;
+		var _v2 = _v1.a;
+		return true;
+	} else {
+		return false;
+	}
+};
+var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
+	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
 };
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
 			f(x));
 	});
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
+var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $mdgriffith$elm_ui$Element$Input$onKey = F2(
+	function (desiredCode, msg) {
+		var decode = function (code) {
+			return _Utils_eq(code, desiredCode) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('Not the enter key');
+		};
+		var isKey = A2(
+			$elm$json$Json$Decode$andThen,
+			decode,
+			A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+		return $mdgriffith$elm_ui$Internal$Model$Attr(
+			A2(
+				$elm$html$Html$Events$preventDefaultOn,
+				'keyup',
+				A2(
+					$elm$json$Json$Decode$map,
+					function (fired) {
+						return _Utils_Tuple2(fired, true);
+					},
+					isKey)));
+	});
+var $mdgriffith$elm_ui$Element$Input$onEnter = function (msg) {
+	return A2($mdgriffith$elm_ui$Element$Input$onKey, $mdgriffith$elm_ui$Element$Input$enter, msg);
+};
+var $mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
+var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		$elm$core$String$fromInt(n));
+};
+var $mdgriffith$elm_ui$Element$Input$button = F2(
+	function (attrs, _v0) {
+		var onPress = _v0.onPress;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$pointer,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											$elm$html$Html$Attributes$tabindex(0)),
+										function () {
+											if (onPress.$ === 'Nothing') {
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$Attr(
+														$elm$html$Html$Attributes$disabled(true)),
+													attrs);
+											} else {
+												var msg = onPress.a;
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Element$Events$onClick(msg),
+													A2(
+														$elm$core$List$cons,
+														$mdgriffith$elm_ui$Element$Input$onEnter(msg),
+														attrs));
+											}
+										}()))))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
+var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
+var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
+var $avh4$elm_color$Color$charcoal = A4($avh4$elm_color$Color$RgbaSpace, 85 / 255, 87 / 255, 83 / 255, 1.0);
+var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
+var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'bc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
+			'border-color',
+			clr));
+};
+var $avh4$elm_color$Color$darkGray = A4($avh4$elm_color$Color$RgbaSpace, 186 / 255, 189 / 255, 182 / 255, 1.0);
+var $avh4$elm_color$Color$darkGreen = A4($avh4$elm_color$Color$RgbaSpace, 78 / 255, 154 / 255, 6 / 255, 1.0);
+var $mdgriffith$elm_ui$Element$el = F2(
+	function (attrs, child) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					attrs)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[child])));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $author$project$Element$Extra$elText = F2(
+	function (attrs, string) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			attrs,
+			$mdgriffith$elm_ui$Element$text(string));
+	});
+var $mdgriffith$elm_ui$Element$fillPortion = $mdgriffith$elm_ui$Internal$Model$Fill;
 var $author$project$Todo$Item$getRawText = function (_v0) {
 	var string = _v0.c;
 	return string;
@@ -11314,12 +11511,6 @@ var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
 		return {$: 'Placeholder', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
-var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
-	return {$: 'Text', a: a};
-};
-var $mdgriffith$elm_ui$Element$text = function (content) {
-	return $mdgriffith$elm_ui$Internal$Model$Text(content);
-};
 var $author$project$Todo$App$justPlaceholderText = A2(
 	$elm$core$Basics$composeL,
 	A2(
@@ -11331,18 +11522,565 @@ var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
 var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
-var $mdgriffith$elm_ui$Element$Input$TextArea = {$: 'TextArea'};
-var $mdgriffith$elm_ui$Internal$Model$Class = F2(
-	function (a, b) {
-		return {$: 'Class', a: a, b: b};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Enter = {$: 'Enter'};
+var $Gizra$elm_keyboard_event$Keyboard$Event$KeyboardEvent = F7(
+	function (altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey) {
+		return {altKey: altKey, ctrlKey: ctrlKey, key: key, keyCode: keyCode, metaKey: metaKey, repeat: repeat, shiftKey: shiftKey};
 	});
-var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
-	return {$: 'Describe', a: a};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
 };
-var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
-var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
+var $Gizra$elm_keyboard_event$Keyboard$Event$decodeKey = $elm$json$Json$Decode$maybe(
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (key) {
+			return $elm$core$String$isEmpty(key) ? $elm$json$Json$Decode$fail('empty key') : $elm$json$Json$Decode$succeed(key);
+		},
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $Gizra$elm_keyboard_event$Keyboard$Event$decodeNonZero = A2(
+	$elm$json$Json$Decode$andThen,
+	function (code) {
+		return (!code) ? $elm$json$Json$Decode$fail('code was zero') : $elm$json$Json$Decode$succeed(code);
+	},
+	$elm$json$Json$Decode$int);
+var $Gizra$elm_keyboard_event$Keyboard$Event$decodeKeyCode = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			A2($elm$json$Json$Decode$field, 'keyCode', $Gizra$elm_keyboard_event$Keyboard$Event$decodeNonZero),
+			A2($elm$json$Json$Decode$field, 'which', $Gizra$elm_keyboard_event$Keyboard$Event$decodeNonZero),
+			A2($elm$json$Json$Decode$field, 'charCode', $Gizra$elm_keyboard_event$Keyboard$Event$decodeNonZero),
+			$elm$json$Json$Decode$succeed(0)
+		]));
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$A = {$: 'A'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Add = {$: 'Add'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Alt = {$: 'Alt'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Ambiguous = function (a) {
+	return {$: 'Ambiguous', a: a};
+};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$B = {$: 'B'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Backspace = {$: 'Backspace'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$C = {$: 'C'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$CapsLock = {$: 'CapsLock'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$ChromeSearch = {$: 'ChromeSearch'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Command = {$: 'Command'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Ctrl = function (a) {
+	return {$: 'Ctrl', a: a};
+};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$D = {$: 'D'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Decimal = {$: 'Decimal'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Delete = {$: 'Delete'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Divide = {$: 'Divide'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Down = {$: 'Down'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$E = {$: 'E'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Eight = {$: 'Eight'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$End = {$: 'End'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Escape = {$: 'Escape'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F = {$: 'F'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F1 = {$: 'F1'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F10 = {$: 'F10'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F11 = {$: 'F11'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F12 = {$: 'F12'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F2 = {$: 'F2'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F3 = {$: 'F3'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F4 = {$: 'F4'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F5 = {$: 'F5'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F6 = {$: 'F6'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F7 = {$: 'F7'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F8 = {$: 'F8'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$F9 = {$: 'F9'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Five = {$: 'Five'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Four = {$: 'Four'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$G = {$: 'G'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$H = {$: 'H'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Home = {$: 'Home'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$I = {$: 'I'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Insert = {$: 'Insert'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$J = {$: 'J'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$K = {$: 'K'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$L = {$: 'L'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Left = {$: 'Left'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$M = {$: 'M'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Multiply = {$: 'Multiply'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$N = {$: 'N'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Nine = {$: 'Nine'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumLock = {$: 'NumLock'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadEight = {$: 'NumpadEight'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadFive = {$: 'NumpadFive'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadFour = {$: 'NumpadFour'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadNine = {$: 'NumpadNine'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadOne = {$: 'NumpadOne'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadSeven = {$: 'NumpadSeven'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadSix = {$: 'NumpadSix'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadThree = {$: 'NumpadThree'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadTwo = {$: 'NumpadTwo'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadZero = {$: 'NumpadZero'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$O = {$: 'O'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$One = {$: 'One'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$P = {$: 'P'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$PageDown = {$: 'PageDown'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$PageUp = {$: 'PageUp'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$PauseBreak = {$: 'PauseBreak'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$PrintScreen = {$: 'PrintScreen'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Q = {$: 'Q'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$R = {$: 'R'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Right = {$: 'Right'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$S = {$: 'S'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$ScrollLock = {$: 'ScrollLock'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Seven = {$: 'Seven'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Shift = function (a) {
+	return {$: 'Shift', a: a};
+};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Six = {$: 'Six'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Spacebar = {$: 'Spacebar'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Subtract = {$: 'Subtract'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$T = {$: 'T'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Tab = {$: 'Tab'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Three = {$: 'Three'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Two = {$: 'Two'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$U = {$: 'U'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Unknown = function (a) {
+	return {$: 'Unknown', a: a};
+};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Up = {$: 'Up'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$V = {$: 'V'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$W = {$: 'W'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Windows = {$: 'Windows'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$X = {$: 'X'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Y = {$: 'Y'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Z = {$: 'Z'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Zero = {$: 'Zero'};
+var $SwiftsNamesake$proper_keyboard$Keyboard$Key$fromCode = function (keyCode) {
+	switch (keyCode) {
+		case 8:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Backspace;
+		case 9:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Tab;
+		case 13:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Enter;
+		case 16:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Shift($elm$core$Maybe$Nothing);
+		case 17:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Ctrl($elm$core$Maybe$Nothing);
+		case 18:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Alt;
+		case 19:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$PauseBreak;
+		case 20:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$CapsLock;
+		case 27:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Escape;
+		case 32:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Spacebar;
+		case 33:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$PageUp;
+		case 34:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$PageDown;
+		case 35:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$End;
+		case 36:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Home;
+		case 37:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Left;
+		case 38:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Up;
+		case 39:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Right;
+		case 40:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Down;
+		case 44:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$PrintScreen;
+		case 45:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Insert;
+		case 46:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Delete;
+		case 48:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Zero;
+		case 49:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$One;
+		case 50:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Two;
+		case 51:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Three;
+		case 52:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Four;
+		case 53:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Five;
+		case 54:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Six;
+		case 55:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Seven;
+		case 56:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Eight;
+		case 57:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Nine;
+		case 65:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$A;
+		case 66:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$B;
+		case 67:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$C;
+		case 68:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$D;
+		case 69:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$E;
+		case 70:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F;
+		case 71:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$G;
+		case 72:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$H;
+		case 73:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$I;
+		case 74:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$J;
+		case 75:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$K;
+		case 76:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$L;
+		case 77:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$M;
+		case 78:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$N;
+		case 79:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$O;
+		case 80:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$P;
+		case 81:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Q;
+		case 82:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$R;
+		case 83:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$S;
+		case 84:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$T;
+		case 85:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$U;
+		case 86:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$V;
+		case 87:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$W;
+		case 88:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$X;
+		case 89:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Y;
+		case 90:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Z;
+		case 91:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Ambiguous(
+				_List_fromArray(
+					[$SwiftsNamesake$proper_keyboard$Keyboard$Key$Windows, $SwiftsNamesake$proper_keyboard$Keyboard$Key$Command, $SwiftsNamesake$proper_keyboard$Keyboard$Key$ChromeSearch]));
+		case 96:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadZero;
+		case 97:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadOne;
+		case 98:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadTwo;
+		case 99:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadThree;
+		case 100:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadFour;
+		case 101:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadFive;
+		case 102:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadSix;
+		case 103:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadSeven;
+		case 104:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadEight;
+		case 105:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumpadNine;
+		case 106:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Multiply;
+		case 107:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Add;
+		case 109:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Subtract;
+		case 110:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Decimal;
+		case 111:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Divide;
+		case 112:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F1;
+		case 113:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F2;
+		case 114:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F3;
+		case 115:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F4;
+		case 116:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F5;
+		case 117:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F6;
+		case 118:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F7;
+		case 119:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F8;
+		case 120:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F9;
+		case 121:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F10;
+		case 122:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F11;
+		case 123:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$F12;
+		case 144:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$NumLock;
+		case 145:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$ScrollLock;
+		default:
+			return $SwiftsNamesake$proper_keyboard$Keyboard$Key$Unknown(keyCode);
+	}
+};
+var $elm$json$Json$Decode$map7 = _Json_map7;
+var $Gizra$elm_keyboard_event$Keyboard$Event$decodeKeyboardEvent = A8(
+	$elm$json$Json$Decode$map7,
+	$Gizra$elm_keyboard_event$Keyboard$Event$KeyboardEvent,
+	A2($elm$json$Json$Decode$field, 'altKey', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'ctrlKey', $elm$json$Json$Decode$bool),
+	$Gizra$elm_keyboard_event$Keyboard$Event$decodeKey,
+	A2($elm$json$Json$Decode$map, $SwiftsNamesake$proper_keyboard$Keyboard$Key$fromCode, $Gizra$elm_keyboard_event$Keyboard$Event$decodeKeyCode),
+	A2($elm$json$Json$Decode$field, 'metaKey', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'repeat', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool));
+var $Gizra$elm_keyboard_event$Keyboard$Event$considerKeyboardEvent = function (func) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		function (event) {
+			var _v0 = func(event);
+			if (_v0.$ === 'Just') {
+				var msg = _v0.a;
+				return $elm$json$Json$Decode$succeed(msg);
+			} else {
+				return $elm$json$Json$Decode$fail('Ignoring keyboard event');
+			}
+		},
+		$Gizra$elm_keyboard_event$Keyboard$Event$decodeKeyboardEvent);
+};
+var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
+var $author$project$Element$Extra$onlyForKey = F3(
+	function (key, msg, keyEvent) {
+		return _Utils_eq(keyEvent.keyCode, key) ? $elm$core$Maybe$Just(msg) : $elm$core$Maybe$Nothing;
+	});
+var $author$project$Element$Extra$onEnter = function (msg) {
+	return $mdgriffith$elm_ui$Element$htmlAttribute(
+		A2(
+			$elm$html$Html$Events$on,
+			'keyup',
+			$Gizra$elm_keyboard_event$Keyboard$Event$considerKeyboardEvent(
+				A2($author$project$Element$Extra$onlyForKey, $SwiftsNamesake$proper_keyboard$Keyboard$Key$Enter, msg))));
+};
+var $mdgriffith$elm_ui$Internal$Model$OnLeft = {$: 'OnLeft'};
+var $mdgriffith$elm_ui$Internal$Model$Nearby = F2(
+	function (a, b) {
+		return {$: 'Nearby', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$createNearby = F2(
+	function (loc, element) {
+		if (element.$ === 'Empty') {
+			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+		} else {
+			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
+		}
+	});
+var $mdgriffith$elm_ui$Element$onLeft = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnLeft, element);
+};
+var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
+	function (a, b, c, d, e) {
+		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
+var $mdgriffith$elm_ui$Element$paddingXY = F2(
+	function (x, y) {
+		return _Utils_eq(x, y) ? A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				'p-' + $elm$core$String$fromInt(x),
+				x,
+				x,
+				x,
+				x)) : A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				'p-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $author$project$Todo$Item$getImportance = function (_v0) {
+	var imp = _v0.a;
+	return imp;
+};
+var $author$project$Todo$Item$getUrgency = function (_v0) {
+	var urg = _v0.b;
+	return urg;
+};
+var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
+var $mdgriffith$elm_ui$Element$padding = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			'p-' + $elm$core$String$fromInt(x),
+			x,
+			x,
+			x,
+			x));
+};
+var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
+var $author$project$Todo$App$renderImportance = function (importance) {
+	var _v0 = function () {
+		switch (importance.$) {
+			case 'Need':
+				return _Utils_Tuple2($avh4$elm_color$Color$red, 'NEED');
+			case 'Want':
+				return _Utils_Tuple2($avh4$elm_color$Color$orange, 'WANT');
+			default:
+				return _Utils_Tuple2($avh4$elm_color$Color$darkGreen, 'NOT IMPORTANT');
+		}
+	}();
+	var colorToUse = _v0.a;
+	var textToDisplay = _v0.b;
+	return A2(
+		$author$project$Element$Extra$elText,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Background$color(
+				$author$project$Element$Extra$toElementColor(colorToUse)),
+				$mdgriffith$elm_ui$Element$Border$rounded(6),
+				$mdgriffith$elm_ui$Element$padding(4),
+				$mdgriffith$elm_ui$Element$centerY
+			]),
+		textToDisplay);
+};
+var $author$project$Todo$App$renderUrgency = function (urgency) {
+	var _v0 = function () {
+		switch (urgency.$) {
+			case 'Asap':
+				return _Utils_Tuple2($avh4$elm_color$Color$red, 'ASAP');
+			case 'Deadline':
+				return _Utils_Tuple2($avh4$elm_color$Color$orange, 'DEADLINE: --/--/--');
+			default:
+				return _Utils_Tuple2($avh4$elm_color$Color$darkGreen, 'WHENEVER');
+		}
+	}();
+	var colorToUse = _v0.a;
+	var textToDisplay = _v0.b;
+	return A2(
+		$author$project$Element$Extra$elText,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Background$color(
+				$author$project$Element$Extra$toElementColor(colorToUse)),
+				$mdgriffith$elm_ui$Element$Border$rounded(6),
+				$mdgriffith$elm_ui$Element$padding(4),
+				$mdgriffith$elm_ui$Element$centerY
+			]),
+		textToDisplay);
+};
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
+	function (a, b, c) {
+		return {$: 'SpacingStyle', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
+var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
+	function (x, y) {
+		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
+	});
+var $mdgriffith$elm_ui$Element$spacing = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$spacing,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
+			x,
+			x));
+};
+var $author$project$Todo$App$renderParsed = F2(
+	function (attributes, item) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0),
+						$mdgriffith$elm_ui$Element$spacing(8),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+					]),
+				attributes),
+			_List_fromArray(
+				[
+					$author$project$Todo$App$renderImportance(
+					$author$project$Todo$Item$getImportance(item)),
+					$author$project$Todo$App$renderUrgency(
+					$author$project$Todo$Item$getUrgency(item))
+				]));
+	});
+var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
+	var topLeft = _v0.topLeft;
+	var topRight = _v0.topRight;
+	var bottomLeft = _v0.bottomLeft;
+	var bottomRight = _v0.bottomRight;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + ($elm$core$String$fromInt(topLeft) + ('-' + ($elm$core$String$fromInt(topRight) + ($elm$core$String$fromInt(bottomLeft) + ('-' + $elm$core$String$fromInt(bottomRight)))))),
+			'border-radius',
+			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
+};
+var $mdgriffith$elm_ui$Element$Input$TextInputNode = function (a) {
+	return {$: 'TextInputNode', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$TextArea = {$: 'TextArea'};
+var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
+var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
 var $mdgriffith$elm_ui$Element$Input$applyLabel = F3(
 	function (attrs, label, input) {
 		if (label.$ === 'HiddenLabel') {
@@ -11457,85 +12195,12 @@ var $mdgriffith$elm_ui$Element$Input$calcMoveToCompensateForPadding = function (
 };
 var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
 var $mdgriffith$elm_ui$Element$clip = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.clip);
-var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
-var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
-var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderColor,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Colored,
-			'bc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
-			'border-color',
-			clr));
-};
 var $mdgriffith$elm_ui$Element$rgb = F3(
 	function (r, g, b) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
 	});
 var $mdgriffith$elm_ui$Element$Input$darkGrey = A3($mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
-var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
-	function (a, b, c, d, e) {
-		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
-var $mdgriffith$elm_ui$Element$paddingXY = F2(
-	function (x, y) {
-		return _Utils_eq(x, y) ? A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				'p-' + $elm$core$String$fromInt(x),
-				x,
-				x,
-				x,
-				x)) : A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				'p-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
 var $mdgriffith$elm_ui$Element$Input$defaultTextPadding = A2($mdgriffith$elm_ui$Element$paddingXY, 12, 12);
-var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
-	return {$: 'Fill', a: a};
-};
-var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
-var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
-	function (a, b, c) {
-		return {$: 'SpacingStyle', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
-var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
-	function (x, y) {
-		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
-	});
-var $mdgriffith$elm_ui$Element$spacing = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$spacing,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
-			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
-			x,
-			x));
-};
 var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
 var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
 	function (a, b, c, d, e) {
@@ -11570,15 +12235,6 @@ var $mdgriffith$elm_ui$Element$Input$getHeight = function (attr) {
 		return $elm$core$Maybe$Just(h);
 	} else {
 		return $elm$core$Maybe$Nothing;
-	}
-};
-var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
-	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
-		var _v1 = attr.b;
-		var _v2 = _v1.a;
-		return true;
-	} else {
-		return false;
 	}
 };
 var $mdgriffith$elm_ui$Internal$Model$Label = function (a) {
@@ -11651,7 +12307,6 @@ var $elm$html$Html$Events$alwaysStop = function (x) {
 var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
 	return {$: 'MayStopPropagation', a: a};
 };
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var $elm$html$Html$Events$stopPropagationOn = F2(
 	function (event, decoder) {
 		return A2(
@@ -11706,7 +12361,6 @@ var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
 			bottom,
 			left));
 };
-var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
 var $mdgriffith$elm_ui$Element$Input$isFill = function (len) {
 	isFill:
 	while (true) {
@@ -11984,23 +12638,6 @@ var $mdgriffith$elm_ui$Element$alpha = function (o) {
 			transparency));
 };
 var $mdgriffith$elm_ui$Element$Input$charcoal = A3($mdgriffith$elm_ui$Element$rgb, 136 / 255, 138 / 255, 133 / 255);
-var $mdgriffith$elm_ui$Element$el = F2(
-	function (attrs, child) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					attrs)),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[child])));
-	});
 var $mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
 	function (_v0, forPlaceholder, on) {
 		var placeholderAttrs = _v0.a;
@@ -12029,14 +12666,6 @@ var $mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
 	});
 var $mdgriffith$elm_ui$Element$scrollbarY = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbarsY);
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
 var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
 var $mdgriffith$elm_ui$Element$Input$spellcheck = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$spellcheck);
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
@@ -12292,197 +12921,112 @@ var $mdgriffith$elm_ui$Element$Input$textHelper = F3(
 			textOptions.label,
 			wrappedInput);
 	});
-var $mdgriffith$elm_ui$Element$Input$multiline = F2(
-	function (attrs, multi) {
-		return A3(
-			$mdgriffith$elm_ui$Element$Input$textHelper,
-			{autofill: $elm$core$Maybe$Nothing, spellchecked: multi.spellcheck, type_: $mdgriffith$elm_ui$Element$Input$TextArea},
-			attrs,
-			{label: multi.label, onChange: multi.onChange, placeholder: multi.placeholder, text: multi.text});
+var $mdgriffith$elm_ui$Element$Input$text = $mdgriffith$elm_ui$Element$Input$textHelper(
+	{
+		autofill: $elm$core$Maybe$Nothing,
+		spellchecked: false,
+		type_: $mdgriffith$elm_ui$Element$Input$TextInputNode('text')
 	});
-var $author$project$Todo$Item$getImportance = function (_v0) {
-	var imp = _v0.a;
-	return imp;
-};
-var $author$project$Todo$Item$getUrgency = function (_v0) {
-	var urg = _v0.b;
-	return urg;
-};
-var $author$project$Element$Extra$elText = F2(
-	function (attrs, string) {
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			attrs,
-			$mdgriffith$elm_ui$Element$text(string));
-	});
-var $avh4$elm_color$Color$green = A4($avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
-var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
-var $mdgriffith$elm_ui$Element$padding = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			'p-' + $elm$core$String$fromInt(x),
-			x,
-			x,
-			x,
-			x));
-};
-var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
-var $author$project$Todo$App$renderImportance = function (importance) {
-	switch (importance.$) {
-		case 'Need':
-			return A2(
-				$author$project$Element$Extra$elText,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$red)),
-						$mdgriffith$elm_ui$Element$Border$rounded(6),
-						$mdgriffith$elm_ui$Element$padding(4)
-					]),
-				'NEED');
-		case 'Want':
-			return A2(
-				$author$project$Element$Extra$elText,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$orange)),
-						$mdgriffith$elm_ui$Element$Border$rounded(6),
-						$mdgriffith$elm_ui$Element$padding(4)
-					]),
-				'WANT');
-		default:
-			return A2(
-				$author$project$Element$Extra$elText,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$green)),
-						$mdgriffith$elm_ui$Element$Border$rounded(6),
-						$mdgriffith$elm_ui$Element$padding(4)
-					]),
-				'NONE');
-	}
-};
-var $author$project$Todo$App$renderUrgency = function (urgency) {
-	switch (urgency.$) {
-		case 'Asap':
-			return A2(
-				$author$project$Element$Extra$elText,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$red)),
-						$mdgriffith$elm_ui$Element$Border$rounded(6),
-						$mdgriffith$elm_ui$Element$padding(4)
-					]),
-				'ASAP');
-		case 'Deadline':
-			var posix = urgency.a;
-			return A2(
-				$author$project$Element$Extra$elText,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$orange)),
-						$mdgriffith$elm_ui$Element$Border$rounded(6),
-						$mdgriffith$elm_ui$Element$padding(4)
-					]),
-				'DEADLINE: --/--/--');
-		default:
-			return A2(
-				$author$project$Element$Extra$elText,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$green)),
-						$mdgriffith$elm_ui$Element$Border$rounded(6),
-						$mdgriffith$elm_ui$Element$padding(4)
-					]),
-				'WHENEVER');
-	}
-};
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
-var $elm$core$Debug$toString = _Debug_toString;
-var $author$project$Todo$App$renderParsed = F2(
+var $author$project$Todo$App$mainInput = F2(
 	function (attributes, item) {
 		return A2(
 			$mdgriffith$elm_ui$Element$row,
 			_List_fromArray(
 				[
-					A2($mdgriffith$elm_ui$Element$paddingXY, 8, 16),
-					$mdgriffith$elm_ui$Element$spacing(8)
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
 				]),
 			_List_fromArray(
 				[
-					$author$project$Todo$App$renderImportance(
-					$author$project$Todo$Item$getImportance(item)),
-					$author$project$Todo$App$renderUrgency(
-					$author$project$Todo$Item$getUrgency(item)),
-					$mdgriffith$elm_ui$Element$text(
-					$elm$core$Debug$toString(
-						$author$project$Todo$Item$getRawText(item)))
+					A2(
+					$mdgriffith$elm_ui$Element$Input$text,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								$author$project$Element$Extra$onEnter($author$project$Todo$App$TriggerAddItem),
+								$mdgriffith$elm_ui$Element$Background$color(
+								$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$charcoal)),
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$fillPortion(5)),
+								$mdgriffith$elm_ui$Element$Border$width(0),
+								$mdgriffith$elm_ui$Element$Border$roundEach(
+								{bottomLeft: 6, bottomRight: 0, topLeft: 6, topRight: 0})
+							]),
+						_Utils_ap(
+							A2(
+								$elm$core$Maybe$withDefault,
+								_List_Nil,
+								A2(
+									$elm$core$Maybe$map,
+									$elm$core$List$singleton,
+									A2(
+										$elm$core$Maybe$map,
+										A2(
+											$elm$core$Basics$composeL,
+											$mdgriffith$elm_ui$Element$onLeft,
+											$author$project$Todo$App$renderParsed(_List_Nil)),
+										item))),
+							attributes)),
+					{
+						label: $mdgriffith$elm_ui$Element$Input$labelHidden('main input text box'),
+						onChange: $author$project$Todo$App$OnInputChange,
+						placeholder: $author$project$Todo$App$justPlaceholderText('add things to your todo list'),
+						text: A2(
+							$elm$core$Maybe$withDefault,
+							'',
+							A2($elm$core$Maybe$map, $author$project$Todo$Item$getRawText, item))
+					}),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkGreen)),
+							$mdgriffith$elm_ui$Element$Border$color(
+							$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkGray)),
+							$mdgriffith$elm_ui$Element$Border$width(0),
+							$mdgriffith$elm_ui$Element$Border$roundEach(
+							{bottomLeft: 0, bottomRight: 6, topLeft: 0, topRight: 6}),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$fillPortion(1)),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+						]),
+					{
+						label: A2(
+							$author$project$Element$Extra$elText,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$centerX,
+									$mdgriffith$elm_ui$Element$centerY,
+									A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0)
+								]),
+							'add'),
+						onPress: $elm$core$Maybe$Just($author$project$Todo$App$TriggerAddItem)
+					})
 				]));
 	});
-var $elm$core$List$singleton = function (value) {
-	return _List_fromArray(
-		[value]);
+var $author$project$Todo$App$renderItem = function (item) {
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0),
+				$mdgriffith$elm_ui$Element$spacing(8),
+				$mdgriffith$elm_ui$Element$centerX,
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
+			]),
+		_List_fromArray(
+			[
+				$author$project$Todo$App$renderImportance(
+				$author$project$Todo$Item$getImportance(item)),
+				$author$project$Todo$App$renderUrgency(
+				$author$project$Todo$Item$getUrgency(item)),
+				$mdgriffith$elm_ui$Element$text(
+				'\"' + ($author$project$Todo$Item$getRawText(item) + '\"'))
+			]));
 };
-var $author$project$Todo$App$mainInput = F2(
-	function (attributes, item) {
-		return A2(
-			$mdgriffith$elm_ui$Element$Input$multiline,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Background$color($author$project$Todo$App$bgColor)
-					]),
-				_Utils_ap(
-					A2(
-						$elm$core$Maybe$withDefault,
-						_List_Nil,
-						A2(
-							$elm$core$Maybe$map,
-							$elm$core$List$singleton,
-							A2(
-								$elm$core$Maybe$map,
-								A2(
-									$elm$core$Basics$composeL,
-									$mdgriffith$elm_ui$Element$below,
-									$author$project$Todo$App$renderParsed(_List_Nil)),
-								item))),
-					attributes)),
-			{
-				label: $mdgriffith$elm_ui$Element$Input$labelHidden('main input text box'),
-				onChange: $author$project$Todo$App$OnInputChange,
-				placeholder: $author$project$Todo$App$justPlaceholderText('add things to your todo list'),
-				spellcheck: true,
-				text: A2(
-					$elm$core$Maybe$withDefault,
-					'',
-					A2($elm$core$Maybe$map, $author$project$Todo$Item$getRawText, item))
-			});
-	});
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
 var $author$project$Todo$App$textColor = $author$project$Element$Extra$toElementColor($avh4$elm_color$Color$white);
 var $author$project$Todo$App$view = function (model) {
@@ -12495,11 +13039,17 @@ var $author$project$Todo$App$view = function (model) {
 		body: A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
-				[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
-			_List_fromArray(
 				[
-					A2($author$project$Todo$App$mainInput, _List_Nil, model.inputValue)
-				])),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(16)
+				]),
+			_Utils_ap(
+				_List_fromArray(
+					[
+						A2($author$project$Todo$App$mainInput, _List_Nil, model.inputValue)
+					]),
+				A2($elm$core$List$map, $author$project$Todo$App$renderItem, model.items))),
 		options: _List_Nil,
 		title: 'Todo App'
 	};
