@@ -89,7 +89,7 @@ mainInput attributes item =
                 , bottomRight = 0
                 }
              ]
-                ++ (Maybe.map (below << renderParsed []) item
+                ++ (Maybe.map (onLeft << renderParsed []) item
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
                    )
@@ -123,7 +123,7 @@ justPlaceholderText =
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
 renderParsed attributes item =
-    row ([ paddingXY 8 16, spacing 8 ] ++ attributes)
+    row ([ paddingXY 8 16, spacing 8, height fill ] ++ attributes)
         [ renderImportance <| Item.getImportance item
         , renderUrgency <| Item.getUrgency item
         ]
@@ -147,6 +147,7 @@ renderImportance importance =
         [ Background.color (toElementColor colorToUse)
         , Border.rounded 6
         , padding 4
+        , centerY
         ]
         textToDisplay
 
@@ -169,6 +170,7 @@ renderUrgency urgency =
         [ Background.color (toElementColor colorToUse)
         , Border.rounded 6
         , padding 4
+        , centerY
         ]
         textToDisplay
 
