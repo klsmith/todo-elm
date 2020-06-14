@@ -6,7 +6,10 @@ import Element.Border as ElBdr
 import Element.Extra as Elx exposing (Document)
 import Element.Input as Eli exposing (Placeholder)
 import Ports.LocalStorage exposing (addLocalStorageListener, onLocalStorageChange)
+import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
+import Todo.Token as Token exposing (Token(..))
+import Todo.Urgency exposing (Urgency(..))
 
 
 
@@ -94,7 +97,7 @@ renderItem item =
         ]
         [ importanceBadge (Item.getImportance item)
         , urgencyBadge (Item.getUrgency item)
-        , badge Color.blue (Item.getRawText item)
+        , badge Color.blue (Item.getDetails item)
         ]
 
 
@@ -151,6 +154,10 @@ mainInput attributes item =
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
                    )
+                -- ++ (Maybe.map (El.above << debugTokens) item
+                --         |> Maybe.map List.singleton
+                --         |> Maybe.withDefault []
+                --    )
                 ++ attributes
             )
             { onChange = OnInputChange
@@ -184,6 +191,24 @@ mainInput attributes item =
         ]
 
 
+debugTokens : Item -> Element msg
+debugTokens item =
+    El.row [] (List.map debugToken (Token.tokenize (Item.getRawText item)))
+
+
+debugToken : Token -> Element msg
+debugToken token =
+    case token of
+        Imp _ imp ->
+            importanceBadge imp
+
+        Urg _ urg ->
+            urgencyBadge urg
+
+        Txt txt ->
+            badge Color.blue txt
+
+
 justPlaceholderText : String -> Maybe (Placeholder msg)
 justPlaceholderText =
     Just << Eli.placeholder [ Elx.fontColor <| Color.lightCharcoal ] << El.text
@@ -203,35 +228,35 @@ renderParsed attributes item =
         ]
 
 
-importanceBadge : Item.Importance -> Element msg
+importanceBadge : Importance -> Element msg
 importanceBadge importance =
     case importance of
-        Item.Need ->
+        Need ->
             badge Color.red "NEED"
 
-        Item.Want ->
+        Want ->
             badge Color.orange "WANT"
 
-        Item.NoImportance ->
+        NoImportance ->
             badge Color.darkGreen "NOT IMPORTANT"
 
 
-urgencyBadge : Item.Urgency -> Element msg
+urgencyBadge : Urgency -> Element msg
 urgencyBadge urgency =
     case urgency of
-        Item.Asap ->
+        Asap ->
             badge Color.red "ASAP"
 
-        Item.Soon ->
+        Soon ->
             badge Color.orange "SOON"
 
-        Item.Deadline _ ->
+        Deadline _ ->
             badge Color.orange "DEADLINE: --/--/--"
 
-        Item.Eventually ->
+        Eventually ->
             badge Color.darkYellow "EVENTUALLY"
 
-        Item.Whenever ->
+        Whenever ->
             badge Color.darkGreen "WHENEVER"
 
 

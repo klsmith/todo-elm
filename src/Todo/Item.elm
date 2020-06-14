@@ -1,219 +1,88 @@
 module Todo.Item exposing
-    ( Importance(..)
-    , Item
-    , RawText
-    , Urgency(..)
+    ( Item
     , compare
+    , getDetails
     , getImportance
     , getRawText
     , getUrgency
     , parse
     )
 
-import Time exposing (Posix)
+import Todo.Importance as Importance exposing (Importance(..))
+import Todo.Token as Token exposing (Token)
+import Todo.Urgency as Urgency exposing (Urgency(..))
+import Util exposing (andThenCompareWith)
 
 
 type Item
-    = Item Importance Urgency RawText
-
-
-type Importance
-    = NoImportance
-    | Want
-    | Need
-
-
-type Urgency
-    = Whenever
-    | Eventually
-    | Deadline Posix
-    | Soon
-    | Asap
-
-
-type alias RawText =
-    String
-
-
-type Token
-    = Txt String
-    | Imp String Importance
-    | Urg String Urgency
+    = Item Importance Urgency String String
 
 
 compare : Item -> Item -> Order
 compare itemA itemB =
-    impCompare
+    Importance.compare
         (getImportance itemA)
         (getImportance itemB)
-        |> andThenWith urgCompare
+        |> andThenCompareWith
+            Urgency.compare
             (getUrgency itemA)
             (getUrgency itemB)
-        |> andThenWith Basics.compare
+        |> andThenCompareWith
+            Basics.compare
             (getRawText itemA)
             (getRawText itemB)
 
 
-impCompare : Importance -> Importance -> Order
-impCompare impA impB =
-    Basics.compare
-        (impToIndex impA)
-        (impToIndex impB)
-
-
-urgCompare : Urgency -> Urgency -> Order
-urgCompare urgA urgB =
-    Basics.compare
-        (urgToIndex urgA)
-        (urgToIndex urgB)
-
-
-andThenWith : (a -> a -> Order) -> a -> a -> Order -> Order
-andThenWith comparator a b higherOrder =
-    if higherOrder == EQ then
-        comparator a b
-
-    else
-        higherOrder
-
-
-impToIndex : Importance -> Int
-impToIndex imp =
-    case imp of
-        NoImportance ->
-            0
-
-        Want ->
-            1
-
-        Need ->
-            2
-
-
-urgToIndex : Urgency -> Int
-urgToIndex urg =
-    case urg of
-        Whenever ->
-            0
-
-        Eventually ->
-            1
-
-        Deadline _ ->
-            2
-
-        Soon ->
-            3
-
-        Asap ->
-            4
-
-
-getRawText : Item -> String
-getRawText (Item _ _ string) =
-    string
-
-
 getImportance : Item -> Importance
-getImportance (Item imp _ _) =
+getImportance (Item imp _ _ _) =
     imp
 
 
 getUrgency : Item -> Urgency
-getUrgency (Item _ urg _) =
+getUrgency (Item _ urg _ _) =
     urg
 
 
+getDetails : Item -> String
+getDetails (Item _ _ details _) =
+    details
+
+
+getRawText : Item -> String
+getRawText (Item _ _ _ rawText) =
+    rawText
+
+
 parse : String -> Maybe Item
-parse string =
-    parseTokens (tokenize string)
+parse =
+    parseTokens << Token.tokenize
 
 
 parseTokens : List Token -> Maybe Item
 parseTokens tokens =
     let
         imp =
-            List.filterMap extractImp tokens
+            List.filterMap Token.toImportance tokens
                 |> List.head
                 |> Maybe.withDefault NoImportance
 
         urg =
-            List.filterMap extractUrg tokens
+            List.filterMap Token.toUrgency tokens
                 |> List.head
                 |> Maybe.withDefault Whenever
 
+        txts =
+            List.filterMap Token.toText tokens
+
         rawText =
-            List.map tokenToString tokens
+            List.map Token.toString tokens
                 |> String.join " "
     in
-    if String.isEmpty rawText then
+    if List.length txts == 1 then
+        Just (Item imp urg (String.concat txts) rawText)
+
+    else if String.isEmpty rawText then
         Nothing
 
     else
-        Just (Item imp urg rawText)
-
-
-extractImp : Token -> Maybe Importance
-extractImp t =
-    case t of
-        Imp _ i ->
-            Just i
-
-        _ ->
-            Nothing
-
-
-extractUrg : Token -> Maybe Urgency
-extractUrg t =
-    case t of
-        Urg _ u ->
-            Just u
-
-        _ ->
-            Nothing
-
-
-tokenToString : Token -> String
-tokenToString token =
-    case token of
-        Txt string ->
-            string
-
-        Imp string _ ->
-            string
-
-        Urg string _ ->
-            string
-
-
-tokenize : String -> List Token
-tokenize string =
-    let
-        upperString =
-            String.toUpper string
-    in
-    if String.contains " " string then
-        String.split " " string
-            |> List.map tokenize
-            |> List.concat
-
-    else if upperString == "NEED" then
-        [ Imp string Need ]
-
-    else if upperString == "WANT" then
-        [ Imp string Want ]
-
-    else if upperString == "ASAP" then
-        [ Urg string Asap ]
-
-    else if upperString == "SOON" then
-        [ Urg string Soon ]
-
-    else if upperString == "EVENTUALLY" then
-        [ Urg string Eventually ]
-
-    else if upperString == "WHENEVER" then
-        [ Urg string Whenever ]
-
-    else
-        [ Txt string ]
+        Just (Item imp urg rawText rawText)
