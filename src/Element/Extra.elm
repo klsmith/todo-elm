@@ -1,7 +1,10 @@
 module Element.Extra exposing
     ( Document
+    , backgroundColor
+    , borderColor
     , document
     , elText
+    , fontColor
     , mapDocument
     , onEnter
     , toElementColor
@@ -9,7 +12,10 @@ module Element.Extra exposing
 
 import Browser
 import Color exposing (Color)
-import Element exposing (Attribute, Element, Option, layoutWith)
+import Element exposing (Attr, Attribute, Element, Option, layoutWith)
+import Element.Background
+import Element.Border
+import Element.Font
 import Html.Events
 import Keyboard.Event exposing (KeyboardEvent, considerKeyboardEvent)
 import Keyboard.Key as Key exposing (Key)
@@ -68,6 +74,21 @@ mapDocument toMsg doc =
 elText : List (Attribute msg) -> String -> Element msg
 elText attrs string =
     Element.el attrs <| Element.text string
+
+
+fontColor : Color -> Attr decorative msg
+fontColor =
+    Element.Font.color << toElementColor
+
+
+borderColor : Color -> Attr decorative msg
+borderColor =
+    Element.Border.color << toElementColor
+
+
+backgroundColor : Color -> Attr decorative msg
+backgroundColor =
+    Element.Background.color << toElementColor
 
 
 toElementColor : Color -> Element.Color

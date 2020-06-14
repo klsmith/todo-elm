@@ -4,7 +4,7 @@ import Color
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Extra exposing (Document, elText, onEnter, toElementColor)
+import Element.Extra exposing (Document, backgroundColor, borderColor, elText, fontColor, onEnter, toElementColor)
 import Element.Font as Font
 import Element.Input as Input exposing (labelHidden, placeholder)
 import Ports.LocalStorage exposing (addLocalStorageListener, onLocalStorageChange)
@@ -49,14 +49,14 @@ storageKey =
 -- VIEW
 
 
-bgColor : Element.Color
+bgColor : Color.Color
 bgColor =
-    toElementColor Color.darkCharcoal
+    Color.darkCharcoal
 
 
-textColor : Element.Color
+textColor : Color.Color
 textColor =
-    toElementColor Color.white
+    Color.white
 
 
 view : Model -> Document Msg
@@ -70,8 +70,8 @@ view model =
             }
         ]
     , attributes =
-        [ Background.color bgColor
-        , Font.color textColor
+        [ backgroundColor bgColor
+        , fontColor textColor
         ]
     , body =
         column
@@ -81,7 +81,7 @@ view model =
             ]
             ([ mainInput [] model.inputValue
              ]
-                ++ List.map renderItem model.items
+                ++ List.reverse (List.map renderItem model.items)
             )
     }
 
@@ -95,17 +95,22 @@ renderItem item =
         , centerY
         , width shrink
         ]
-        [ renderImportance <| Item.getImportance item
-        , renderUrgency <| Item.getUrgency item
-        , elText
-            [ Background.color (toElementColor Color.charcoal)
-            , Border.rounded 6
-            , padding 4
-            , centerY
-            , myShadow
-            ]
-            (Item.getRawText item)
+        [ importanceBadge (Item.getImportance item)
+        , urgencyBadge (Item.getUrgency item)
+        , badge Color.blue (Item.getRawText item)
         ]
+
+
+badge : Color.Color -> String -> Element msg
+badge color string =
+    elText
+        [ backgroundColor color
+        , Border.rounded 6
+        , padding 4
+        , centerY
+        , myShadow
+        ]
+        string
 
 
 myShadow =
@@ -128,10 +133,15 @@ mainInput attributes item =
         ]
         [ Input.text
             ([ onEnter TriggerAddItem
-             , Background.color (toElementColor Color.charcoal)
+             , backgroundColor Color.charcoal
              , width (fillPortion 5)
-             , Border.width 1
-             , Border.color (Element.rgba 0 0 0 0)
+             , Border.widthEach
+                { left = 2
+                , top = 2
+                , bottom = 2
+                , right = 1
+                }
+             , borderColor (Color.rgba 0 0 0 0)
              , Border.roundEach
                 { topLeft = 6
                 , bottomLeft = 6
@@ -153,12 +163,22 @@ mainInput attributes item =
             , label = labelHidden "main input text box"
             }
         , Input.button
-            [ Background.color (toElementColor Color.darkGreen)
-            , Border.width 1
-            , Border.color (Element.rgba 0 0 0 0)
+            [ backgroundColor Color.darkGreen
+            , Border.widthEach
+                { left = 1
+                , top = 2
+                , bottom = 2
+                , right = 2
+                }
+            , borderColor (Color.rgba 0 0 0 0)
             , Border.roundEach { topLeft = 0, topRight = 6, bottomLeft = 0, bottomRight = 6 }
             , width (fillPortion 1)
             , height fill
+            , focused
+                [ borderColor Color.darkGreen
+                , fontColor Color.darkGreen
+                , backgroundColor Color.darkCharcoal
+                ]
             ]
             { onPress = Just TriggerAddItem
             , label = elText [ centerX, centerY, paddingXY 8 0 ] "add"
@@ -168,7 +188,7 @@ mainInput attributes item =
 
 justPlaceholderText : String -> Maybe (Input.Placeholder msg)
 justPlaceholderText =
-    Just << placeholder [ Font.color <| toElementColor Color.lightCharcoal ] << text
+    Just << placeholder [ fontColor <| Color.lightCharcoal ] << text
 
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
@@ -180,57 +200,41 @@ renderParsed attributes item =
          ]
             ++ attributes
         )
-        [ renderImportance <| Item.getImportance item
-        , renderUrgency <| Item.getUrgency item
+        [ importanceBadge <| Item.getImportance item
+        , urgencyBadge <| Item.getUrgency item
         ]
 
 
-renderImportance : Item.Importance -> Element msg
-renderImportance importance =
-    let
-        ( colorToUse, textToDisplay ) =
-            case importance of
-                Item.Need ->
-                    ( Color.red, "NEED" )
+importanceBadge : Item.Importance -> Element msg
+importanceBadge importance =
+    case importance of
+        Item.Need ->
+            badge Color.red "NEED"
 
-                Item.Want ->
-                    ( Color.orange, "WANT" )
+        Item.Want ->
+            badge Color.orange "WANT"
 
-                Item.NoImportance ->
-                    ( Color.darkGreen, "NOT IMPORTANT" )
-    in
-    elText
-        [ Background.color (toElementColor colorToUse)
-        , Border.rounded 6
-        , padding 4
-        , centerY
-        , myShadow
-        ]
-        textToDisplay
+        Item.NoImportance ->
+            badge Color.darkGreen "NOT IMPORTANT"
 
 
-renderUrgency : Item.Urgency -> Element msg
-renderUrgency urgency =
-    let
-        ( colorToUse, textToDisplay ) =
-            case urgency of
-                Item.Asap ->
-                    ( Color.red, "ASAP" )
+urgencyBadge : Item.Urgency -> Element msg
+urgencyBadge urgency =
+    case urgency of
+        Item.Asap ->
+            badge Color.red "ASAP"
 
-                Item.Deadline _ ->
-                    ( Color.orange, "DEADLINE: --/--/--" )
+        Item.Soon ->
+            badge Color.orange "SOON"
 
-                Item.Whenever ->
-                    ( Color.darkGreen, "WHENEVER" )
-    in
-    elText
-        [ Background.color (toElementColor colorToUse)
-        , Border.rounded 6
-        , padding 4
-        , centerY
-        , myShadow
-        ]
-        textToDisplay
+        Item.Deadline _ ->
+            badge Color.orange "DEADLINE: --/--/--"
+
+        Item.Eventually ->
+            badge Color.darkYellow "EVENTUALLY"
+
+        Item.Whenever ->
+            badge Color.darkGreen "WHENEVER"
 
 
 
@@ -270,10 +274,12 @@ update msg model =
             ( { model
                 | inputValue = Nothing
                 , items =
-                    (Maybe.map List.singleton model.inputValue
-                        |> Maybe.withDefault []
-                    )
-                        ++ model.items
+                    List.sortWith Item.compare
+                        ((Maybe.map List.singleton model.inputValue
+                            |> Maybe.withDefault []
+                         )
+                            ++ model.items
+                        )
               }
             , Cmd.none
             )

@@ -3,6 +3,7 @@ module Todo.Item exposing
     , Item
     , RawText
     , Urgency(..)
+    , compare
     , getImportance
     , getRawText
     , getUrgency
@@ -17,15 +18,17 @@ type Item
 
 
 type Importance
-    = Need
+    = NoImportance
     | Want
-    | NoImportance
+    | Need
 
 
 type Urgency
-    = Asap
+    = Whenever
+    | Eventually
     | Deadline Posix
-    | Whenever
+    | Soon
+    | Asap
 
 
 type alias RawText =
@@ -36,6 +39,74 @@ type Token
     = Txt String
     | Imp String Importance
     | Urg String Urgency
+
+
+compare : Item -> Item -> Order
+compare itemA itemB =
+    impCompare
+        (getImportance itemA)
+        (getImportance itemB)
+        |> andThenWith urgCompare
+            (getUrgency itemA)
+            (getUrgency itemB)
+        |> andThenWith Basics.compare
+            (getRawText itemA)
+            (getRawText itemB)
+
+
+impCompare : Importance -> Importance -> Order
+impCompare impA impB =
+    Basics.compare
+        (impToIndex impA)
+        (impToIndex impB)
+
+
+urgCompare : Urgency -> Urgency -> Order
+urgCompare urgA urgB =
+    Basics.compare
+        (urgToIndex urgA)
+        (urgToIndex urgB)
+
+
+andThenWith : (a -> a -> Order) -> a -> a -> Order -> Order
+andThenWith comparator a b higherOrder =
+    if higherOrder == EQ then
+        comparator a b
+
+    else
+        higherOrder
+
+
+impToIndex : Importance -> Int
+impToIndex imp =
+    case imp of
+        NoImportance ->
+            0
+
+        Want ->
+            1
+
+        Need ->
+            2
+
+
+urgToIndex : Urgency -> Int
+urgToIndex urg =
+    case urg of
+        Whenever ->
+            0
+
+        Eventually ->
+            1
+
+        Deadline _ ->
+            2
+
+        Soon ->
+            3
+
+        Asap ->
+            4
 
 
 getRawText : Item -> String
@@ -134,6 +205,12 @@ tokenize string =
 
     else if upperString == "ASAP" then
         [ Urg string Asap ]
+
+    else if upperString == "SOON" then
+        [ Urg string Soon ]
+
+    else if upperString == "EVENTUALLY" then
+        [ Urg string Eventually ]
 
     else if upperString == "WHENEVER" then
         [ Urg string Whenever ]
