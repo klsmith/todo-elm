@@ -11033,11 +11033,140 @@ var $author$project$Element$Extra$document = function (config) {
 		});
 };
 var $author$project$Ports$LocalStorage$addLocalStorageListener = _Platform_outgoingPort('addLocalStorageListener', $elm$json$Json$Encode$string);
+var $author$project$Main$storageKey = 'io.github.klsmith.todo-elm';
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2(
+		{inputValue: $elm$core$Maybe$Nothing, items: _List_Nil},
+		$author$project$Ports$LocalStorage$addLocalStorageListener($author$project$Main$storageKey));
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Util$andThenCompareWith = F4(
+	function (comparator, a, b, higherOrder) {
+		return _Utils_eq(higherOrder, $elm$core$Basics$EQ) ? A2(comparator, a, b) : higherOrder;
+	});
+var $author$project$Todo$Importance$asIndex = function (imp) {
+	switch (imp.$) {
+		case 'NoImportance':
+			return 0;
+		case 'Want':
+			return 1;
+		default:
+			return 2;
+	}
+};
+var $author$project$Todo$Importance$compare = F2(
+	function (a, b) {
+		return A2(
+			$elm$core$Basics$compare,
+			$author$project$Todo$Importance$asIndex(a),
+			$author$project$Todo$Importance$asIndex(b));
+	});
+var $author$project$Todo$Urgency$asIndex = function (urg) {
+	switch (urg.$) {
+		case 'Whenever':
+			return 0;
+		case 'Eventually':
+			return 1;
+		case 'Deadline':
+			return 2;
+		case 'Soon':
+			return 3;
+		default:
+			return 4;
+	}
+};
+var $author$project$Todo$Urgency$compare = F2(
+	function (a, b) {
+		return A2(
+			$elm$core$Basics$compare,
+			$author$project$Todo$Urgency$asIndex(a),
+			$author$project$Todo$Urgency$asIndex(b));
+	});
+var $author$project$Todo$Item$getDetails = function (_v0) {
+	var details = _v0.c;
+	return details;
+};
+var $author$project$Todo$Item$getImportance = function (_v0) {
+	var imp = _v0.a;
+	return imp;
+};
+var $author$project$Todo$Item$getUrgency = function (_v0) {
+	var urg = _v0.b;
+	return urg;
+};
+var $author$project$Todo$Item$compare = F2(
+	function (itemA, itemB) {
+		return A4(
+			$author$project$Util$andThenCompareWith,
+			$elm$core$Basics$compare,
+			$author$project$Todo$Item$getDetails(itemA),
+			$author$project$Todo$Item$getDetails(itemB),
+			A4(
+				$author$project$Util$andThenCompareWith,
+				$author$project$Todo$Urgency$compare,
+				$author$project$Todo$Item$getUrgency(itemA),
+				$author$project$Todo$Item$getUrgency(itemB),
+				A2(
+					$author$project$Todo$Importance$compare,
+					$author$project$Todo$Item$getImportance(itemA),
+					$author$project$Todo$Item$getImportance(itemB))));
+	});
+var $author$project$Todo$Item$equals = F2(
+	function (itemA, itemB) {
+		return _Utils_eq(
+			A2($author$project$Todo$Item$compare, itemA, itemB),
+			$elm$core$Basics$EQ);
+	});
+var $elm$core$List$sortWith = _List_sortWith;
+var $author$project$Main$addItemFromInput = function (model) {
+	var _v0 = model.inputValue;
+	if (_v0.$ === 'Just') {
+		var item = _v0.a;
+		return _Utils_update(
+			model,
+			{
+				items: A2(
+					$elm$core$List$any,
+					$author$project$Todo$Item$equals(item),
+					model.items) ? model.items : A2(
+					$elm$core$List$sortWith,
+					$author$project$Todo$Item$compare,
+					A2($elm$core$List$cons, item, model.items))
+			});
+	} else {
+		return model;
+	}
+};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
 			f(x));
 	});
+var $author$project$Main$removeItem = F2(
+	function (item, model) {
+		return _Utils_update(
+			model,
+			{
+				items: A2(
+					$elm$core$List$filter,
+					A2(
+						$elm$core$Basics$composeL,
+						$elm$core$Basics$not,
+						$author$project$Todo$Item$equals(item)),
+					model.items)
+			});
+	});
+var $author$project$Main$resetInput = function (model) {
+	return _Utils_update(
+		model,
+		{inputValue: $elm$core$Maybe$Nothing});
+};
 var $author$project$Todo$Item$Item = F4(
 	function (a, b, c, d) {
 		return {$: 'Item', a: a, b: b, c: c, d: d};
@@ -11294,159 +11423,32 @@ var $author$project$Todo$Token$tokenize = function (string) {
 	}
 };
 var $author$project$Todo$Item$parse = A2($elm$core$Basics$composeL, $author$project$Todo$Item$parseTokens, $author$project$Todo$Token$tokenize);
-var $author$project$Main$storageKey = 'io.github.klsmith.todo-elm';
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		{
-			inputValue: $author$project$Todo$Item$parse('need something asap'),
-			items: _List_Nil
-		},
-		$author$project$Ports$LocalStorage$addLocalStorageListener($author$project$Main$storageKey));
-};
-var $author$project$Main$OnStorageChange = function (a) {
-	return {$: 'OnStorageChange', a: a};
-};
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$null = _Json_decodeNull;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Ports$LocalStorage$onLocalStorageChange = _Platform_incomingPort(
-	'onLocalStorageChange',
-	A2(
-		$elm$json$Json$Decode$andThen,
-		function (value) {
-			return A2(
-				$elm$json$Json$Decode$andThen,
-				function (key) {
-					return $elm$json$Json$Decode$succeed(
-						{key: key, value: value});
-				},
-				A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-		},
-		A2(
-			$elm$json$Json$Decode$field,
-			'value',
-			$elm$json$Json$Decode$oneOf(
-				_List_fromArray(
-					[
-						$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
-						A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$string)
-					])))));
-var $author$project$Main$subscriptions = function (_v0) {
-	return $author$project$Ports$LocalStorage$onLocalStorageChange($author$project$Main$OnStorageChange);
-};
-var $author$project$Util$andThenCompareWith = F4(
-	function (comparator, a, b, higherOrder) {
-		return _Utils_eq(higherOrder, $elm$core$Basics$EQ) ? A2(comparator, a, b) : higherOrder;
+var $author$project$Main$updateInput = F2(
+	function (string, model) {
+		return _Utils_update(
+			model,
+			{
+				inputValue: $author$project$Todo$Item$parse(string)
+			});
 	});
-var $author$project$Todo$Importance$asIndex = function (imp) {
-	switch (imp.$) {
-		case 'NoImportance':
-			return 0;
-		case 'Want':
-			return 1;
-		default:
-			return 2;
-	}
-};
-var $author$project$Todo$Importance$compare = F2(
-	function (a, b) {
-		return A2(
-			$elm$core$Basics$compare,
-			$author$project$Todo$Importance$asIndex(a),
-			$author$project$Todo$Importance$asIndex(b));
-	});
-var $author$project$Todo$Urgency$asIndex = function (urg) {
-	switch (urg.$) {
-		case 'Whenever':
-			return 0;
-		case 'Eventually':
-			return 1;
-		case 'Deadline':
-			return 2;
-		case 'Soon':
-			return 3;
-		default:
-			return 4;
-	}
-};
-var $author$project$Todo$Urgency$compare = F2(
-	function (a, b) {
-		return A2(
-			$elm$core$Basics$compare,
-			$author$project$Todo$Urgency$asIndex(a),
-			$author$project$Todo$Urgency$asIndex(b));
-	});
-var $author$project$Todo$Item$getImportance = function (_v0) {
-	var imp = _v0.a;
-	return imp;
-};
-var $author$project$Todo$Item$getRawText = function (_v0) {
-	var rawText = _v0.d;
-	return rawText;
-};
-var $author$project$Todo$Item$getUrgency = function (_v0) {
-	var urg = _v0.b;
-	return urg;
-};
-var $author$project$Todo$Item$compare = F2(
-	function (itemA, itemB) {
-		return A4(
-			$author$project$Util$andThenCompareWith,
-			$elm$core$Basics$compare,
-			$author$project$Todo$Item$getRawText(itemA),
-			$author$project$Todo$Item$getRawText(itemB),
-			A4(
-				$author$project$Util$andThenCompareWith,
-				$author$project$Todo$Urgency$compare,
-				$author$project$Todo$Item$getUrgency(itemA),
-				$author$project$Todo$Item$getUrgency(itemB),
-				A2(
-					$author$project$Todo$Importance$compare,
-					$author$project$Todo$Item$getImportance(itemA),
-					$author$project$Todo$Item$getImportance(itemB))));
-	});
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $elm$core$List$singleton = function (value) {
-	return _List_fromArray(
-		[value]);
-};
-var $elm$core$List$sortWith = _List_sortWith;
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var _v0 = _Utils_Tuple2(msg, model);
-		switch (_v0.a.$) {
+		switch (msg.$) {
 			case 'OnInputChange':
-				var newValue = _v0.a.a;
+				var string = msg.a;
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							inputValue: $author$project$Todo$Item$parse(newValue)
-						}),
+					A2($author$project$Main$updateInput, string, model),
 					$elm$core$Platform$Cmd$none);
 			case 'TriggerAddItem':
-				var _v1 = _v0.a;
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							inputValue: $elm$core$Maybe$Nothing,
-							items: A2(
-								$elm$core$List$sortWith,
-								$author$project$Todo$Item$compare,
-								_Utils_ap(
-									A2(
-										$elm$core$Maybe$withDefault,
-										_List_Nil,
-										A2($elm$core$Maybe$map, $elm$core$List$singleton, model.inputValue)),
-									model.items))
-						}),
+					$author$project$Main$resetInput(
+						$author$project$Main$addItemFromInput(model)),
 					$elm$core$Platform$Cmd$none);
 			default:
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var item = msg.a;
+				return _Utils_Tuple2(
+					A2($author$project$Main$removeItem, item, model),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
@@ -11478,12 +11480,6 @@ var $author$project$Element$Extra$toElementColor = function (color) {
 		$avh4$elm_color$Color$toRgba(color));
 };
 var $author$project$Element$Extra$backgroundColor = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Element$Background$color, $author$project$Element$Extra$toElementColor);
-var $avh4$elm_color$Color$RgbaSpace = F4(
-	function (a, b, c, d) {
-		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
-	});
-var $avh4$elm_color$Color$darkCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 46 / 255, 52 / 255, 54 / 255, 1.0);
-var $author$project$Main$bgColor = $avh4$elm_color$Color$darkCharcoal;
 var $mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
 var $mdgriffith$elm_ui$Internal$Model$asColumn = $mdgriffith$elm_ui$Internal$Model$AsColumn;
 var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
@@ -11514,6 +11510,20 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$darkCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 46 / 255, 52 / 255, 54 / 255, 1.0);
+var $mdgriffith$elm_ui$Element$Font$family = function (families) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$FontFamily,
+			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
+			families));
+};
 var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
@@ -11522,6 +11532,14 @@ var $mdgriffith$elm_ui$Internal$Model$FocusStyleOption = function (a) {
 	return {$: 'FocusStyleOption', a: a};
 };
 var $mdgriffith$elm_ui$Element$focusStyle = $mdgriffith$elm_ui$Internal$Model$FocusStyleOption;
+var $avh4$elm_color$Color$lightCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 136 / 255, 138 / 255, 133 / 255, 1.0);
+var $author$project$Main$focusStyle = {
+	backgroundColor: $elm$core$Maybe$Just(
+		$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkCharcoal)),
+	borderColor: $elm$core$Maybe$Just(
+		$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$lightCharcoal)),
+	shadow: $elm$core$Maybe$Nothing
+};
 var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -11533,10 +11551,6 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			fontColor));
 };
 var $author$project$Element$Extra$fontColor = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Element$Font$color, $author$project$Element$Extra$toElementColor);
-var $avh4$elm_color$Color$lightCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 136 / 255, 138 / 255, 133 / 255, 1.0);
-var $author$project$Main$OnInputChange = function (a) {
-	return {$: 'OnInputChange', a: a};
-};
 var $author$project$Main$TriggerAddItem = {$: 'TriggerAddItem'};
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
@@ -11595,7 +11609,9 @@ var $elm$html$Html$Events$onClick = function (msg) {
 };
 var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
 var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
+var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
 	return {$: 'MayPreventDefault', a: a};
 };
@@ -11606,6 +11622,7 @@ var $elm$html$Html$Events$preventDefaultOn = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
 	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
 var $mdgriffith$elm_ui$Element$Input$onKey = F2(
 	function (desiredCode, msg) {
 		var decode = function (code) {
@@ -11703,7 +11720,6 @@ var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
 var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
-var $avh4$elm_color$Color$charcoal = A4($avh4$elm_color$Color$RgbaSpace, 85 / 255, 87 / 255, 83 / 255, 1.0);
 var $avh4$elm_color$Color$darkGreen = A4($avh4$elm_color$Color$RgbaSpace, 78 / 255, 154 / 255, 6 / 255, 1.0);
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
@@ -11874,26 +11890,203 @@ var $mdgriffith$elm_ui$Element$focused = function (decs) {
 			$mdgriffith$elm_ui$Internal$Model$Focus,
 			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
 };
-var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
-	function (a, b) {
-		return {$: 'Placeholder', a: a, b: b};
+var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
+	function (a, b, c, d, e) {
+		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
 	});
-var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
-var $author$project$Main$justPlaceholderText = A2(
-	$elm$core$Basics$composeL,
-	A2(
-		$elm$core$Basics$composeL,
-		$elm$core$Maybe$Just,
-		$mdgriffith$elm_ui$Element$Input$placeholder(
+var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
+var $mdgriffith$elm_ui$Element$paddingXY = F2(
+	function (x, y) {
+		return _Utils_eq(x, y) ? A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				'p-' + $elm$core$String$fromInt(x),
+				x,
+				x,
+				x,
+				x)) : A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				'p-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $author$project$Main$prefRounded = 6;
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
+	var topLeft = _v0.topLeft;
+	var topRight = _v0.topRight;
+	var bottomLeft = _v0.bottomLeft;
+	var bottomRight = _v0.bottomRight;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + ($elm$core$String$fromInt(topLeft) + ('-' + ($elm$core$String$fromInt(topRight) + ($elm$core$String$fromInt(bottomLeft) + ('-' + $elm$core$String$fromInt(bottomRight)))))),
+			'border-radius',
+			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
+};
+var $author$project$Util$tern = F2(
+	function (_v0, bool) {
+		var first = _v0.a;
+		var second = _v0.b;
+		return bool ? first : second;
+	});
+var $author$project$Main$roundEach = function (_v0) {
+	var topLeft = _v0.topLeft;
+	var bottomLeft = _v0.bottomLeft;
+	var topRight = _v0.topRight;
+	var bottomRight = _v0.bottomRight;
+	return $mdgriffith$elm_ui$Element$Border$roundEach(
+		{
+			bottomLeft: A2(
+				$author$project$Util$tern,
+				_Utils_Tuple2($author$project$Main$prefRounded, 0),
+				bottomLeft),
+			bottomRight: A2(
+				$author$project$Util$tern,
+				_Utils_Tuple2($author$project$Main$prefRounded, 0),
+				bottomRight),
+			topLeft: A2(
+				$author$project$Util$tern,
+				_Utils_Tuple2($author$project$Main$prefRounded, 0),
+				topLeft),
+			topRight: A2(
+				$author$project$Util$tern,
+				_Utils_Tuple2($author$project$Main$prefRounded, 0),
+				topRight)
+		});
+};
+var $author$project$Main$roundRightSideOnly = $author$project$Main$roundEach(
+	{bottomLeft: false, bottomRight: true, topLeft: false, topRight: true});
+var $avh4$elm_color$Color$rgba = F4(
+	function (r, g, b, a) {
+		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
+	});
+var $author$project$Main$transparent = A4($avh4$elm_color$Color$rgba, 0, 0, 0, 0);
+var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
+	function (a, b, c, d, e) {
+		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Element$Border$width = function (v) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + $elm$core$String$fromInt(v),
+			v,
+			v,
+			v,
+			v));
+};
+var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
+	var bottom = _v0.bottom;
+	var top = _v0.top;
+	var left = _v0.left;
+	var right = _v0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
+};
+var $author$project$Main$addButton = A2(
+	$mdgriffith$elm_ui$Element$Input$button,
+	_List_fromArray(
+		[
+			$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$darkGreen),
+			$mdgriffith$elm_ui$Element$Border$widthEach(
+			{bottom: 2, left: 1, right: 2, top: 2}),
+			$author$project$Element$Extra$borderColor($author$project$Main$transparent),
+			$author$project$Main$roundRightSideOnly,
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$fillPortion(1)),
+			$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+			$mdgriffith$elm_ui$Element$focused(
 			_List_fromArray(
 				[
-					$author$project$Element$Extra$fontColor($avh4$elm_color$Color$lightCharcoal)
-				]))),
-	$mdgriffith$elm_ui$Element$text);
-var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
-	return {$: 'HiddenLabel', a: a};
+					$author$project$Element$Extra$borderColor($avh4$elm_color$Color$darkGreen),
+					$author$project$Element$Extra$fontColor($avh4$elm_color$Color$darkGreen),
+					$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$darkCharcoal)
+				]))
+		]),
+	{
+		label: A2(
+			$author$project$Element$Extra$elText,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$centerY,
+					A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0)
+				]),
+			'add'),
+		onPress: $elm$core$Maybe$Just($author$project$Main$TriggerAddItem)
+	});
+var $mdgriffith$elm_ui$Internal$Model$Min = F2(
+	function (a, b) {
+		return {$: 'Min', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$minimum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
+	});
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
 };
-var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $author$project$Main$rounded = $mdgriffith$elm_ui$Element$Border$rounded($author$project$Main$prefRounded);
+var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
+var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
 	return $elm$core$String$concat(
@@ -11919,19 +12112,48 @@ var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
 			'box-shadow',
 			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
 };
-var $author$project$Main$myShadow = $mdgriffith$elm_ui$Element$Border$shadow(
+var $author$project$Main$shadowStyle = $mdgriffith$elm_ui$Element$Border$shadow(
 	{
 		blur: 6,
 		color: $author$project$Element$Extra$toElementColor($avh4$elm_color$Color$black),
 		offset: _Utils_Tuple2(4, 8),
 		size: 0
 	});
+var $author$project$Main$OnInputChange = function (a) {
+	return {$: 'OnInputChange', a: a};
+};
+var $avh4$elm_color$Color$charcoal = A4($avh4$elm_color$Color$RgbaSpace, 85 / 255, 87 / 255, 83 / 255, 1.0);
+var $author$project$Todo$Item$getRawText = function (_v0) {
+	var rawText = _v0.d;
+	return rawText;
+};
+var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
+	function (a, b) {
+		return {$: 'Placeholder', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
+var $author$project$Main$justPlaceholderText = A2(
+	$elm$core$Basics$composeL,
+	A2(
+		$elm$core$Basics$composeL,
+		$elm$core$Maybe$Just,
+		$mdgriffith$elm_ui$Element$Input$placeholder(
+			_List_fromArray(
+				[
+					$author$project$Element$Extra$fontColor($avh4$elm_color$Color$lightCharcoal)
+				]))),
+	$mdgriffith$elm_ui$Element$text);
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
 var $SwiftsNamesake$proper_keyboard$Keyboard$Key$Enter = {$: 'Enter'};
 var $Gizra$elm_keyboard_event$Keyboard$Event$KeyboardEvent = F7(
 	function (altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey) {
 		return {altKey: altKey, ctrlKey: ctrlKey, key: key, keyCode: keyCode, metaKey: metaKey, repeat: repeat, shiftKey: shiftKey};
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$maybe = function (decoder) {
 	return $elm$json$Json$Decode$oneOf(
 		_List_fromArray(
@@ -12292,32 +12514,11 @@ var $mdgriffith$elm_ui$Element$createNearby = F2(
 var $mdgriffith$elm_ui$Element$onLeft = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnLeft, element);
 };
-var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
-	function (a, b, c, d, e) {
-		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
-var $mdgriffith$elm_ui$Element$paddingXY = F2(
-	function (x, y) {
-		return _Utils_eq(x, y) ? A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				'p-' + $elm$core$String$fromInt(x),
-				x,
-				x,
-				x,
-				x)) : A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				'p-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
+var $author$project$Util$applyTuple = F2(
+	function (funct, _v0) {
+		var a = _v0.a;
+		var b = _v0.b;
+		return A2(funct, a, b);
 	});
 var $mdgriffith$elm_ui$Element$padding = function (x) {
 	return A2(
@@ -12331,17 +12532,6 @@ var $mdgriffith$elm_ui$Element$padding = function (x) {
 			x,
 			x));
 };
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
 var $author$project$Main$badge = F2(
 	function (color, string) {
 		return A2(
@@ -12349,45 +12539,31 @@ var $author$project$Main$badge = F2(
 			_List_fromArray(
 				[
 					$author$project$Element$Extra$backgroundColor(color),
-					$mdgriffith$elm_ui$Element$Border$rounded(6),
+					$author$project$Main$rounded,
 					$mdgriffith$elm_ui$Element$padding(4),
 					$mdgriffith$elm_ui$Element$centerY,
-					$author$project$Main$myShadow
+					$author$project$Main$shadowStyle
 				]),
 			string);
 	});
 var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
 var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
-var $author$project$Main$importanceBadge = function (importance) {
-	switch (importance.$) {
+var $author$project$Todo$Importance$getDisplayData = function (imp) {
+	switch (imp.$) {
 		case 'Need':
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$red, 'NEED');
+			return _Utils_Tuple2($avh4$elm_color$Color$red, 'NEED');
 		case 'Want':
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$orange, 'WANT');
+			return _Utils_Tuple2($avh4$elm_color$Color$orange, 'WANT');
 		default:
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$darkGreen, 'NOT IMPORTANT');
+			return _Utils_Tuple2($avh4$elm_color$Color$darkGreen, 'NOT IMPORTANT');
 	}
 };
-var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
-var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
+var $author$project$Main$importanceBadge = function (importance) {
+	return A2(
+		$author$project$Util$applyTuple,
+		$author$project$Main$badge,
+		$author$project$Todo$Importance$getDisplayData(importance));
+};
 var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
 	function (a, b, c) {
 		return {$: 'SpacingStyle', a: a, b: b, c: c};
@@ -12408,19 +12584,25 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x));
 };
 var $avh4$elm_color$Color$darkYellow = A4($avh4$elm_color$Color$RgbaSpace, 196 / 255, 160 / 255, 0 / 255, 1.0);
-var $author$project$Main$urgencyBadge = function (urgency) {
-	switch (urgency.$) {
-		case 'Asap':
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$red, 'ASAP');
-		case 'Soon':
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$orange, 'SOON');
-		case 'Deadline':
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$orange, 'DEADLINE: --/--/--');
+var $author$project$Todo$Urgency$getDisplayData = function (urg) {
+	switch (urg.$) {
+		case 'Whenever':
+			return _Utils_Tuple2($avh4$elm_color$Color$darkGreen, 'WHENEVER');
 		case 'Eventually':
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$darkYellow, 'EVENTUALLY');
+			return _Utils_Tuple2($avh4$elm_color$Color$darkYellow, 'EVENTUALLY');
+		case 'Deadline':
+			return _Utils_Tuple2($avh4$elm_color$Color$orange, 'DEADLINE ???');
+		case 'Soon':
+			return _Utils_Tuple2($avh4$elm_color$Color$orange, 'SOON');
 		default:
-			return A2($author$project$Main$badge, $avh4$elm_color$Color$darkGreen, 'WHENEVER');
+			return _Utils_Tuple2($avh4$elm_color$Color$red, 'ASAP');
 	}
+};
+var $author$project$Main$urgencyBadge = function (urgency) {
+	return A2(
+		$author$project$Util$applyTuple,
+		$author$project$Main$badge,
+		$author$project$Todo$Urgency$getDisplayData(urgency));
 };
 var $author$project$Main$renderParsed = F2(
 	function (attributes, item) {
@@ -12442,23 +12624,11 @@ var $author$project$Main$renderParsed = F2(
 					$author$project$Todo$Item$getUrgency(item))
 				]));
 	});
-var $avh4$elm_color$Color$rgba = F4(
-	function (r, g, b, a) {
-		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
-	});
-var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
-	var topLeft = _v0.topLeft;
-	var topRight = _v0.topRight;
-	var bottomLeft = _v0.bottomLeft;
-	var bottomRight = _v0.bottomRight;
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + ($elm$core$String$fromInt(topLeft) + ('-' + ($elm$core$String$fromInt(topRight) + ($elm$core$String$fromInt(bottomLeft) + ('-' + $elm$core$String$fromInt(bottomRight)))))),
-			'border-radius',
-			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
+var $author$project$Main$roundLeftSideOnly = $author$project$Main$roundEach(
+	{bottomLeft: true, bottomRight: false, topLeft: true, topRight: false});
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
 };
 var $mdgriffith$elm_ui$Element$Input$TextInputNode = function (a) {
 	return {$: 'TextInputNode', a: a};
@@ -12583,22 +12753,6 @@ var $mdgriffith$elm_ui$Element$rgb = F3(
 var $mdgriffith$elm_ui$Element$Input$darkGrey = A3($mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
 var $mdgriffith$elm_ui$Element$Input$defaultTextPadding = A2($mdgriffith$elm_ui$Element$paddingXY, 12, 12);
 var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
-var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
-	function (a, b, c, d, e) {
-		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Element$Border$width = function (v) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + $elm$core$String$fromInt(v),
-			v,
-			v,
-			v,
-			v));
-};
 var $mdgriffith$elm_ui$Element$Input$defaultTextBoxStyle = _List_fromArray(
 	[
 		$mdgriffith$elm_ui$Element$Input$defaultTextPadding,
@@ -13308,129 +13462,92 @@ var $mdgriffith$elm_ui$Element$Input$text = $mdgriffith$elm_ui$Element$Input$tex
 		spellchecked: false,
 		type_: $mdgriffith$elm_ui$Element$Input$TextInputNode('text')
 	});
-var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
-	function (x, y) {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
-var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
-	var bottom = _v0.bottom;
-	var top = _v0.top;
-	var left = _v0.left;
-	var right = _v0.right;
-	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
-			top,
-			right,
-			bottom,
-			left));
-};
-var $author$project$Main$mainInput = F2(
-	function (attributes, item) {
-		return A2(
-			$mdgriffith$elm_ui$Element$row,
+var $author$project$Main$textBox = function (item) {
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$text,
+		_Utils_ap(
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$centerX,
-					$mdgriffith$elm_ui$Element$centerY,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					$author$project$Main$myShadow,
-					$mdgriffith$elm_ui$Element$Border$rounded(6)
+					$author$project$Element$Extra$onEnter($author$project$Main$TriggerAddItem),
+					$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$charcoal),
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$fillPortion(5)),
+					$mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 2, left: 2, right: 1, top: 2}),
+					$author$project$Element$Extra$borderColor($author$project$Main$transparent),
+					$author$project$Main$roundLeftSideOnly
 				]),
-			_List_fromArray(
-				[
+			A2(
+				$elm$core$Maybe$withDefault,
+				_List_Nil,
+				A2(
+					$elm$core$Maybe$map,
+					$elm$core$List$singleton,
 					A2(
-					$mdgriffith$elm_ui$Element$Input$text,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$author$project$Element$Extra$onEnter($author$project$Main$TriggerAddItem),
-								$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$charcoal),
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$fillPortion(5)),
-								$mdgriffith$elm_ui$Element$Border$widthEach(
-								{bottom: 2, left: 2, right: 1, top: 2}),
-								$author$project$Element$Extra$borderColor(
-								A4($avh4$elm_color$Color$rgba, 0, 0, 0, 0)),
-								$mdgriffith$elm_ui$Element$Border$roundEach(
-								{bottomLeft: 6, bottomRight: 0, topLeft: 6, topRight: 0})
-							]),
-						_Utils_ap(
-							A2(
-								$elm$core$Maybe$withDefault,
-								_List_Nil,
-								A2(
-									$elm$core$Maybe$map,
-									$elm$core$List$singleton,
-									A2(
-										$elm$core$Maybe$map,
-										A2(
-											$elm$core$Basics$composeL,
-											$mdgriffith$elm_ui$Element$onLeft,
-											$author$project$Main$renderParsed(_List_Nil)),
-										item))),
-							attributes)),
-					{
-						label: $mdgriffith$elm_ui$Element$Input$labelHidden('main input text box'),
-						onChange: $author$project$Main$OnInputChange,
-						placeholder: $author$project$Main$justPlaceholderText('add things to your todo list'),
-						text: A2(
-							$elm$core$Maybe$withDefault,
-							'',
-							A2($elm$core$Maybe$map, $author$project$Todo$Item$getRawText, item))
-					}),
-					A2(
-					$mdgriffith$elm_ui$Element$Input$button,
-					_List_fromArray(
-						[
-							$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$darkGreen),
-							$mdgriffith$elm_ui$Element$Border$widthEach(
-							{bottom: 2, left: 1, right: 2, top: 2}),
-							$author$project$Element$Extra$borderColor(
-							A4($avh4$elm_color$Color$rgba, 0, 0, 0, 0)),
-							$mdgriffith$elm_ui$Element$Border$roundEach(
-							{bottomLeft: 0, bottomRight: 6, topLeft: 0, topRight: 6}),
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$fillPortion(1)),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$focused(
-							_List_fromArray(
-								[
-									$author$project$Element$Extra$borderColor($avh4$elm_color$Color$darkGreen),
-									$author$project$Element$Extra$fontColor($avh4$elm_color$Color$darkGreen),
-									$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$darkCharcoal)
-								]))
-						]),
-					{
-						label: A2(
-							$author$project$Element$Extra$elText,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$centerX,
-									$mdgriffith$elm_ui$Element$centerY,
-									A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0)
-								]),
-							'add'),
-						onPress: $elm$core$Maybe$Just($author$project$Main$TriggerAddItem)
-					})
-				]));
-	});
+						$elm$core$Maybe$map,
+						A2(
+							$elm$core$Basics$composeL,
+							$mdgriffith$elm_ui$Element$onLeft,
+							$author$project$Main$renderParsed(_List_Nil)),
+						item)))),
+		{
+			label: $mdgriffith$elm_ui$Element$Input$labelHidden('main input text box'),
+			onChange: $author$project$Main$OnInputChange,
+			placeholder: $author$project$Main$justPlaceholderText('add things to your todo list'),
+			text: A2(
+				$elm$core$Maybe$withDefault,
+				'',
+				A2($elm$core$Maybe$map, $author$project$Todo$Item$getRawText, item))
+		});
+};
+var $author$project$Main$mainInput = function (item) {
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$centerX,
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$width(
+				A2($mdgriffith$elm_ui$Element$minimum, 480, $mdgriffith$elm_ui$Element$shrink)),
+				$author$project$Main$shadowStyle,
+				$author$project$Main$rounded
+			]),
+		_List_fromArray(
+			[
+				$author$project$Main$textBox(item),
+				$author$project$Main$addButton
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Model$Monospace = {$: 'Monospace'};
+var $mdgriffith$elm_ui$Element$Font$monospace = $mdgriffith$elm_ui$Internal$Model$Monospace;
 var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
-var $author$project$Todo$Item$getDetails = function (_v0) {
-	var details = _v0.c;
-	return details;
+var $author$project$Main$TriggerRemoveItem = function (a) {
+	return {$: 'TriggerRemoveItem', a: a};
+};
+var $author$project$Main$removeButton = function (item) {
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$button,
+		_List_fromArray(
+			[
+				$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$red),
+				$mdgriffith$elm_ui$Element$Border$rounded(2),
+				$mdgriffith$elm_ui$Element$Border$width(2),
+				$author$project$Element$Extra$borderColor($author$project$Main$transparent),
+				A2($mdgriffith$elm_ui$Element$paddingXY, 4, 0),
+				$author$project$Main$shadowStyle,
+				$mdgriffith$elm_ui$Element$focused(
+				_List_fromArray(
+					[
+						$author$project$Element$Extra$borderColor($avh4$elm_color$Color$red),
+						$author$project$Element$Extra$fontColor($avh4$elm_color$Color$red),
+						$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$darkCharcoal)
+					]))
+			]),
+		{
+			label: $mdgriffith$elm_ui$Element$text('X'),
+			onPress: $elm$core$Maybe$Just(
+				$author$project$Main$TriggerRemoveItem(item))
+		});
 };
 var $author$project$Main$renderItem = function (item) {
 	return A2(
@@ -13452,17 +13569,25 @@ var $author$project$Main$renderItem = function (item) {
 				A2(
 				$author$project$Main$badge,
 				$avh4$elm_color$Color$blue,
-				$author$project$Todo$Item$getDetails(item))
+				$author$project$Todo$Item$getDetails(item)),
+				$author$project$Main$removeButton(item)
 			]));
 };
+var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
-var $author$project$Main$textColor = $avh4$elm_color$Color$white;
 var $author$project$Main$view = function (model) {
 	return {
 		attributes: _List_fromArray(
 			[
-				$author$project$Element$Extra$backgroundColor($author$project$Main$bgColor),
-				$author$project$Element$Extra$fontColor($author$project$Main$textColor)
+				$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$darkCharcoal),
+				$author$project$Element$Extra$fontColor($avh4$elm_color$Color$white),
+				$mdgriffith$elm_ui$Element$Font$family(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Font$typeface('Lucida Console'),
+						$mdgriffith$elm_ui$Element$Font$typeface('Monaco'),
+						$mdgriffith$elm_ui$Element$Font$monospace
+					]))
 			]),
 		body: A2(
 			$mdgriffith$elm_ui$Element$column,
@@ -13474,19 +13599,12 @@ var $author$project$Main$view = function (model) {
 				]),
 			A2(
 				$elm$core$List$cons,
-				A2($author$project$Main$mainInput, _List_Nil, model.inputValue),
+				$author$project$Main$mainInput(model.inputValue),
 				$elm$core$List$reverse(
 					A2($elm$core$List$map, $author$project$Main$renderItem, model.items)))),
 		options: _List_fromArray(
 			[
-				$mdgriffith$elm_ui$Element$focusStyle(
-				{
-					backgroundColor: $elm$core$Maybe$Just(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$darkCharcoal)),
-					borderColor: $elm$core$Maybe$Just(
-						$author$project$Element$Extra$toElementColor($avh4$elm_color$Color$lightCharcoal)),
-					shadow: $elm$core$Maybe$Nothing
-				})
+				$mdgriffith$elm_ui$Element$focusStyle($author$project$Main$focusStyle)
 			]),
 		title: 'Todo App'
 	};
