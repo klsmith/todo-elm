@@ -1,6 +1,7 @@
 module Todo.Item exposing
     ( Item
     , compare
+    , equals
     , getDetails
     , getImportance
     , getRawText
@@ -29,8 +30,13 @@ compare itemA itemB =
             (getUrgency itemB)
         |> andThenCompareWith
             Basics.compare
-            (getRawText itemA)
-            (getRawText itemB)
+            (getDetails itemA)
+            (getDetails itemB)
+
+
+equals : Item -> Item -> Bool
+equals itemA itemB =
+    compare itemA itemB == EQ
 
 
 getImportance : Item -> Importance
