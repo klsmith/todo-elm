@@ -86,7 +86,7 @@ view model =
     }
 
 
-renderItem : Item -> Element msg
+renderItem : Item -> Element Msg
 renderItem item =
     El.row
         [ El.paddingXY 8 0
@@ -98,6 +98,17 @@ renderItem item =
         [ importanceBadge (Item.getImportance item)
         , urgencyBadge (Item.getUrgency item)
         , badge Color.blue (Item.getDetails item)
+        , Eli.button
+            [ Elx.backgroundColor Color.red
+            , ElBdr.rounded 1
+            , ElBdr.width 2
+            , Elx.borderColor (Color.rgba 0 0 0 0)
+            , El.paddingXY 4 0
+            , myShadow
+            ]
+            { onPress = Just (TriggerRemoveItem item)
+            , label = El.text "X"
+            }
         ]
 
 
@@ -154,10 +165,10 @@ mainInput attributes item =
                         |> Maybe.map List.singleton
                         |> Maybe.withDefault []
                    )
-                ++ (Maybe.map (El.above << debugTokens) item
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
-                   )
+                -- ++ (Maybe.map (El.above << debugTokens) item
+                --         |> Maybe.map List.singleton
+                --         |> Maybe.withDefault []
+                --    )
                 ++ attributes
             )
             { onChange = OnInputChange
@@ -266,7 +277,7 @@ urgencyBadge urgency =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    onLocalStorageChange OnStorageChange
+    Sub.none
 
 
 
@@ -275,8 +286,8 @@ subscriptions _ =
 
 type Msg
     = OnInputChange String
-    | OnStorageChange KeyValue
     | TriggerAddItem
+    | TriggerRemoveItem Item
 
 
 
@@ -285,15 +296,15 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
-        ( OnInputChange newValue, _ ) ->
+    case msg of
+        OnInputChange newValue ->
             ( { model
                 | inputValue = Item.parse newValue
               }
             , Cmd.none
             )
 
-        ( TriggerAddItem, _ ) ->
+        TriggerAddItem ->
             ( { model
                 | inputValue = Nothing
                 , items =
@@ -307,8 +318,15 @@ update msg model =
             , Cmd.none
             )
 
-        ( _, _ ) ->
-            ( model, Cmd.none )
+        TriggerRemoveItem item ->
+            ( { model
+                | items =
+                    List.filter
+                        (not << (==) item)
+                        model.items
+              }
+            , Cmd.none
+            )
 
 
 main : Program () Model Msg
