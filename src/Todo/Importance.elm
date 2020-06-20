@@ -1,17 +1,55 @@
 module Todo.Importance exposing
     ( Importance(..)
     , compare
+    , decoder
+    , encode
     , getDisplayData
     , parse
     )
 
 import Color exposing (Color)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode exposing (Value)
 
 
 type Importance
     = NoImportance
     | Want
     | Need
+
+
+encode : Importance -> Value
+encode importance =
+    case importance of
+        NoImportance ->
+            Encode.string "NoImportance"
+
+        Want ->
+            Encode.string "Want"
+
+        Need ->
+            Encode.string "Need"
+
+
+decoder : Decoder Importance
+decoder =
+    Decode.string |> Decode.andThen decoderFromString
+
+
+decoderFromString : String -> Decoder Importance
+decoderFromString string =
+    case string of
+        "NoImportance" ->
+            Decode.succeed NoImportance
+
+        "Want" ->
+            Decode.succeed Want
+
+        "Need" ->
+            Decode.succeed Need
+
+        _ ->
+            Decode.fail ("Unrecognized Importance Value: " ++ string)
 
 
 compare : Importance -> Importance -> Order

@@ -2,16 +2,19 @@ module Main exposing (main)
 
 import Color exposing (Color)
 import Element as El exposing (Attribute, Element)
-import Element.Border as ElBdr
+import Element.Border as ElBr
 import Element.Extra as Elx exposing (Document)
 import Element.Font as Elf
 import Element.Input as Eli exposing (Placeholder)
-import Ports.LocalStorage exposing (addLocalStorageListener, onLocalStorageChange)
+import Ports
+import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
+import Ports.Log as Log
 import Todo.Importance as Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
+import Todo.Save as Save
 import Todo.Token as Token exposing (Token(..))
 import Todo.Urgency as Urgency exposing (Urgency(..))
-import Util exposing (applyTuple, maybePrepend, tern)
+import Util exposing (applyTuple, tern)
 
 
 
@@ -24,12 +27,6 @@ type alias Model =
     }
 
 
-type alias KeyValue =
-    { key : String
-    , value : Maybe String
-    }
-
-
 
 -- INIT
 
@@ -39,13 +36,17 @@ init _ =
     ( { inputValue = Nothing
       , items = []
       }
-    , addLocalStorageListener storageKey
+    , LocalStorage.request storage
     )
 
 
-storageKey : String
-storageKey =
-    "io.github.klsmith.todo-elm"
+storage : LocalStorage.Config Save.Format
+storage =
+    LocalStorage.config
+        { key = "io.github.klsmith.todo-elm2"
+        , encoder = Save.encode
+        , decoder = Save.decoder
+        }
 
 
 
@@ -96,7 +97,7 @@ focusStyle =
 
 shadowStyle : El.Attr decorative msg
 shadowStyle =
-    ElBdr.shadow
+    ElBr.shadow
         { offset = ( 4, 8 )
         , size = 0
         , blur = 6
@@ -124,7 +125,7 @@ textBox item =
         ([ Elx.onEnter TriggerAddItem
          , Elx.backgroundColor Color.charcoal
          , El.width (El.fillPortion 5)
-         , ElBdr.widthEach
+         , ElBr.widthEach
             { left = 2
             , top = 2
             , bottom = 2
@@ -155,7 +156,7 @@ addButton : Element Msg
 addButton =
     Eli.button
         [ Elx.backgroundColor Color.darkGreen
-        , ElBdr.widthEach
+        , ElBr.widthEach
             { left = 1
             , top = 2
             , bottom = 2
@@ -196,8 +197,8 @@ removeButton : Item -> Element Msg
 removeButton item =
     Eli.button
         [ Elx.backgroundColor Color.red
-        , ElBdr.rounded 2
-        , ElBdr.width 2
+        , ElBr.rounded 2
+        , ElBr.width 2
         , Elx.borderColor transparent
         , El.paddingXY 4 0
         , shadowStyle
@@ -268,7 +269,7 @@ prefRounded =
 
 rounded : Attribute msg
 rounded =
-    ElBdr.rounded prefRounded
+    ElBr.rounded prefRounded
 
 
 roundEach :
@@ -279,7 +280,7 @@ roundEach :
     }
     -> Attribute msg
 roundEach { topLeft, bottomLeft, topRight, bottomRight } =
-    ElBdr.roundEach
+    ElBr.roundEach
         { topLeft = topLeft |> tern ( prefRounded, 0 )
         , bottomLeft = bottomLeft |> tern ( prefRounded, 0 )
         , topRight = topRight |> tern ( prefRounded, 0 )
@@ -338,7 +339,9 @@ debugToken token =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Ports.noopListener Noop
+        |> LocalStorage.register OnLocalStorageLoad storage
+        |> Ports.asSubscriptions
 
 
 
@@ -346,9 +349,11 @@ subscriptions _ =
 
 
 type Msg
-    = OnInputChange String
+    = Noop
+    | OnInputChange String
     | TriggerAddItem
     | TriggerRemoveItem Item
+    | OnLocalStorageLoad (StorageResult Save.Format)
 
 
 
@@ -358,22 +363,46 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Noop ->
+            ( model, Cmd.none )
+
         OnInputChange string ->
             ( model |> updateInput string
             , Cmd.none
             )
 
         TriggerAddItem ->
-            ( model
-                |> addItemFromInput
-                |> resetInput
-            , Cmd.none
+            let
+                newModel =
+                    model
+                        |> addItemFromInput
+                        |> resetInput
+            in
+            ( newModel
+            , storage |> LocalStorage.save (Save.V1 newModel.items)
             )
 
         TriggerRemoveItem item ->
-            ( model |> removeItem item
-            , Cmd.none
+            let
+                newModel =
+                    model |> removeItem item
+            in
+            ( newModel
+            , storage |> LocalStorage.save (Save.V1 newModel.items)
             )
+
+        OnLocalStorageLoad result ->
+            case result of
+                Found save ->
+                    case save of
+                        Save.V1 items ->
+                            ( { model | items = items }, Cmd.none )
+
+                NotStored ->
+                    ( { model | items = [] }, Log.string "NotStored" )
+
+                StorageErr err ->
+                    ( model, Log.string ("Storage Error: " ++ Debug.toString err) )
 
 
 

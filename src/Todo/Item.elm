@@ -1,6 +1,8 @@
 module Todo.Item exposing
     ( Item
     , compare
+    , decoder
+    , encode
     , equals
     , getDetails
     , getImportance
@@ -9,6 +11,8 @@ module Todo.Item exposing
     , parse
     )
 
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode exposing (Value)
 import Todo.Importance as Importance exposing (Importance(..))
 import Todo.Token as Token exposing (Token)
 import Todo.Urgency as Urgency exposing (Urgency(..))
@@ -17,6 +21,25 @@ import Util exposing (andThenCompareWith)
 
 type Item
     = Item Importance Urgency String String
+
+
+encode : Item -> Value
+encode (Item imp urg det raw) =
+    Encode.object
+        [ ( "importance", Importance.encode imp )
+        , ( "urgency", Urgency.encode urg )
+        , ( "details", Encode.string det )
+        , ( "rawText", Encode.string raw )
+        ]
+
+
+decoder : Decoder Item
+decoder =
+    Decode.map4 Item
+        (Decode.field "importance" Importance.decoder)
+        (Decode.field "urgency" Urgency.decoder)
+        (Decode.field "details" Decode.string)
+        (Decode.field "rawText" Decode.string)
 
 
 compare : Item -> Item -> Order
