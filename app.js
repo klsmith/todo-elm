@@ -11032,17 +11032,284 @@ var $author$project$Element$Extra$document = function (config) {
 			view: $author$project$Element$Extra$toHtmlView(config.view)
 		});
 };
-var $author$project$Ports$LocalStorage$addLocalStorageListener = _Platform_outgoingPort('addLocalStorageListener', $elm$json$Json$Encode$string);
-var $author$project$Main$storageKey = 'io.github.klsmith.todo-elm';
+var $author$project$Ports$send = _Platform_outgoingPort(
+	'send',
+	function ($) {
+		var a = $.a;
+		var b = $.b;
+		return A2(
+			$elm$json$Json$Encode$list,
+			$elm$core$Basics$identity,
+			_List_fromArray(
+				[
+					$elm$json$Json$Encode$string(a),
+					$elm$core$Basics$identity(b)
+				]));
+	});
+var $author$project$Ports$LocalStorage$request = function (_v0) {
+	var key = _v0.a;
+	return $author$project$Ports$send(
+		_Utils_Tuple2(
+			'Ports.LocalStorage.request',
+			$elm$json$Json$Encode$string(key)));
+};
+var $author$project$Ports$LocalStorage$Config = F3(
+	function (a, b, c) {
+		return {$: 'Config', a: a, b: b, c: c};
+	});
+var $author$project$Ports$LocalStorage$config = function (params) {
+	return A3($author$project$Ports$LocalStorage$Config, params.key, params.encoder, params.decoder);
+};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $author$project$Todo$Save$V1 = function (a) {
+	return {$: 'V1', a: a};
+};
+var $author$project$Todo$Item$Item = F4(
+	function (a, b, c, d) {
+		return {$: 'Item', a: a, b: b, c: c, d: d};
+	});
+var $author$project$Todo$Importance$Need = {$: 'Need'};
+var $author$project$Todo$Importance$NoImportance = {$: 'NoImportance'};
+var $author$project$Todo$Importance$Want = {$: 'Want'};
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$Todo$Importance$decoderFromString = function (string) {
+	switch (string) {
+		case 'NoImportance':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Importance$NoImportance);
+		case 'Want':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Importance$Want);
+		case 'Need':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Importance$Need);
+		default:
+			return $elm$json$Json$Decode$fail('Unrecognized Importance Value: ' + string);
+	}
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Todo$Importance$decoder = A2($elm$json$Json$Decode$andThen, $author$project$Todo$Importance$decoderFromString, $elm$json$Json$Decode$string);
+var $author$project$Todo$Urgency$Asap = {$: 'Asap'};
+var $author$project$Todo$Urgency$Eventually = {$: 'Eventually'};
+var $author$project$Todo$Urgency$Soon = {$: 'Soon'};
+var $author$project$Todo$Urgency$Whenever = {$: 'Whenever'};
+var $author$project$Todo$Urgency$decoderFromString = function (string) {
+	switch (string) {
+		case 'Whenever':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Urgency$Whenever);
+		case 'Eventually':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Urgency$Eventually);
+		case 'Soon':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Urgency$Soon);
+		case 'Asap':
+			return $elm$json$Json$Decode$succeed($author$project$Todo$Urgency$Asap);
+		default:
+			return $elm$json$Json$Decode$fail('Unrecognized Urgency Value: ' + string);
+	}
+};
+var $author$project$Todo$Urgency$decoder = A2($elm$json$Json$Decode$andThen, $author$project$Todo$Urgency$decoderFromString, $elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Todo$Item$decoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Todo$Item$Item,
+	A2($elm$json$Json$Decode$field, 'importance', $author$project$Todo$Importance$decoder),
+	A2($elm$json$Json$Decode$field, 'urgency', $author$project$Todo$Urgency$decoder),
+	A2($elm$json$Json$Decode$field, 'details', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'rawText', $elm$json$Json$Decode$string));
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Todo$Save$decodeVersion = function (version) {
+	if (version === 1) {
+		return A2(
+			$elm$json$Json$Decode$map,
+			$author$project$Todo$Save$V1,
+			A2(
+				$elm$json$Json$Decode$field,
+				'items',
+				$elm$json$Json$Decode$list($author$project$Todo$Item$decoder)));
+	} else {
+		var v = version;
+		return $elm$json$Json$Decode$fail(
+			'Unrecognized Save Format Version: ' + $elm$core$String$fromInt(v));
+	}
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $author$project$Todo$Save$decoder = A2(
+	$elm$json$Json$Decode$andThen,
+	$author$project$Todo$Save$decodeVersion,
+	A2($elm$json$Json$Decode$field, 'version', $elm$json$Json$Decode$int));
+var $author$project$Todo$Importance$encode = function (importance) {
+	switch (importance.$) {
+		case 'NoImportance':
+			return $elm$json$Json$Encode$string('NoImportance');
+		case 'Want':
+			return $elm$json$Json$Encode$string('Want');
+		default:
+			return $elm$json$Json$Encode$string('Need');
+	}
+};
+var $author$project$Todo$Urgency$encode = function (urgency) {
+	switch (urgency.$) {
+		case 'Whenever':
+			return $elm$json$Json$Encode$string('Whenever');
+		case 'Eventually':
+			return $elm$json$Json$Encode$string('Eventually');
+		case 'Soon':
+			return $elm$json$Json$Encode$string('Soon');
+		default:
+			return $elm$json$Json$Encode$string('Asap');
+	}
+};
+var $author$project$Todo$Item$encode = function (_v0) {
+	var imp = _v0.a;
+	var urg = _v0.b;
+	var det = _v0.c;
+	var raw = _v0.d;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'importance',
+				$author$project$Todo$Importance$encode(imp)),
+				_Utils_Tuple2(
+				'urgency',
+				$author$project$Todo$Urgency$encode(urg)),
+				_Utils_Tuple2(
+				'details',
+				$elm$json$Json$Encode$string(det)),
+				_Utils_Tuple2(
+				'rawText',
+				$elm$json$Json$Encode$string(raw))
+			]));
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$Todo$Save$encode = function (format) {
+	var list = format.a;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'version',
+				$elm$json$Json$Encode$int(1)),
+				_Utils_Tuple2(
+				'items',
+				A2($elm$json$Json$Encode$list, $author$project$Todo$Item$encode, list))
+			]));
+};
+var $author$project$Main$storage = $author$project$Ports$LocalStorage$config(
+	{decoder: $author$project$Todo$Save$decoder, encoder: $author$project$Todo$Save$encode, key: 'io.github.klsmith.todo-elm2'});
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{inputValue: $elm$core$Maybe$Nothing, items: _List_Nil},
-		$author$project$Ports$LocalStorage$addLocalStorageListener($author$project$Main$storageKey));
+		$author$project$Ports$LocalStorage$request($author$project$Main$storage));
 };
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$Noop = {$: 'Noop'};
+var $author$project$Main$OnLocalStorageLoad = function (a) {
+	return {$: 'OnLocalStorageLoad', a: a};
+};
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Ports$listen = _Platform_incomingPort(
+	'listen',
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (_v0) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
+				function (_v1) {
+					return $elm$json$Json$Decode$succeed(
+						_Utils_Tuple2(_v0, _v1));
+				},
+				A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$value));
+		},
+		A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$string)));
+var $author$project$Ports$asSubscriptions = function (_v0) {
+	var noop = _v0.a;
+	var listeners = _v0.b;
+	return $author$project$Ports$listen(
+		function (_v1) {
+			var msg = _v1.a;
+			var value = _v1.b;
+			var _v2 = A2($elm$core$Dict$get, msg, listeners);
+			if (_v2.$ === 'Just') {
+				var listener = _v2.a;
+				return listener(value);
+			} else {
+				return noop;
+			}
+		});
+};
+var $author$project$Ports$Listeners = F2(
+	function (a, b) {
+		return {$: 'Listeners', a: a, b: b};
+	});
+var $author$project$Ports$noopListener = function (noop) {
+	return A2($author$project$Ports$Listeners, noop, $elm$core$Dict$empty);
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $author$project$Ports$register = F3(
+	function (msg, listener, _v0) {
+		var noop = _v0.a;
+		var listeners = _v0.b;
+		return A2(
+			$author$project$Ports$Listeners,
+			noop,
+			A3($elm$core$Dict$insert, msg, listener, listeners));
+	});
+var $author$project$Ports$LocalStorage$Found = function (a) {
+	return {$: 'Found', a: a};
+};
+var $author$project$Ports$LocalStorage$JsonError = function (a) {
+	return {$: 'JsonError', a: a};
+};
+var $author$project$Ports$LocalStorage$NotStored = {$: 'NotStored'};
+var $author$project$Ports$LocalStorage$StorageErr = function (a) {
+	return {$: 'StorageErr', a: a};
+};
+var $author$project$Ports$LocalStorage$toStorageResult = function (result) {
+	if (result.$ === 'Ok') {
+		if (result.a.$ === 'Nothing') {
+			var _v1 = result.a;
+			return $author$project$Ports$LocalStorage$NotStored;
+		} else {
+			var value = result.a.a;
+			return $author$project$Ports$LocalStorage$Found(value);
+		}
+	} else {
+		var err = result.a;
+		return $author$project$Ports$LocalStorage$StorageErr(
+			$author$project$Ports$LocalStorage$JsonError(err));
+	}
+};
+var $author$project$Ports$LocalStorage$register = F3(
+	function (handler, _v0, listeners) {
+		var key = _v0.a;
+		var decoder = _v0.c;
+		var listener = A2(
+			$elm$core$Basics$composeR,
+			$elm$json$Json$Decode$decodeValue(
+				$elm$json$Json$Decode$maybe(decoder)),
+			A2($elm$core$Basics$composeR, $author$project$Ports$LocalStorage$toStorageResult, handler));
+		return A3($author$project$Ports$register, 'Ports.LocalStorage.listen.' + key, listener, listeners);
+	});
 var $author$project$Main$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$Ports$asSubscriptions(
+		A3(
+			$author$project$Ports$LocalStorage$register,
+			$author$project$Main$OnLocalStorageLoad,
+			$author$project$Main$storage,
+			$author$project$Ports$noopListener($author$project$Main$Noop)));
 };
 var $author$project$Util$andThenCompareWith = F4(
 	function (comparator, a, b, higherOrder) {
@@ -11071,8 +11338,6 @@ var $author$project$Todo$Urgency$asIndex = function (urg) {
 			return 0;
 		case 'Eventually':
 			return 1;
-		case 'Deadline':
-			return 2;
 		case 'Soon':
 			return 3;
 		default:
@@ -11167,12 +11432,31 @@ var $author$project$Main$resetInput = function (model) {
 		model,
 		{inputValue: $elm$core$Maybe$Nothing});
 };
-var $author$project$Todo$Item$Item = F4(
-	function (a, b, c, d) {
-		return {$: 'Item', a: a, b: b, c: c, d: d};
+var $author$project$Ports$LocalStorage$save = F2(
+	function (value, _v0) {
+		var key = _v0.a;
+		var encoder = _v0.b;
+		return $author$project$Ports$send(
+			_Utils_Tuple2(
+				'Ports.LocalStorage.save',
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'key',
+							$elm$json$Json$Encode$string(key)),
+							_Utils_Tuple2(
+							'value',
+							encoder(value))
+						]))));
 	});
-var $author$project$Todo$Importance$NoImportance = {$: 'NoImportance'};
-var $author$project$Todo$Urgency$Whenever = {$: 'Whenever'};
+var $author$project$Ports$Log$string = function (s) {
+	return $author$project$Ports$send(
+		_Utils_Tuple2(
+			'Ports.Log.string',
+			$elm$json$Json$Encode$string(s)));
+};
+var $elm$core$Debug$toString = _Debug_toString;
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -11345,8 +11629,6 @@ var $author$project$Todo$Token$aggregate = F2(
 			return A2($elm$core$List$cons, token, list);
 		}
 	});
-var $author$project$Todo$Importance$Need = {$: 'Need'};
-var $author$project$Todo$Importance$Want = {$: 'Want'};
 var $elm$core$String$filter = _String_filter;
 var $elm$core$String$toUpper = _String_toUpper;
 var $author$project$Todo$Importance$parse = function (string) {
@@ -11361,9 +11643,6 @@ var $author$project$Todo$Importance$parse = function (string) {
 			return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Todo$Urgency$Asap = {$: 'Asap'};
-var $author$project$Todo$Urgency$Eventually = {$: 'Eventually'};
-var $author$project$Todo$Urgency$Soon = {$: 'Soon'};
 var $author$project$Todo$Urgency$parse = function (string) {
 	var _v0 = $elm$core$String$toUpper(
 		A2($elm$core$String$filter, $elm$core$Char$isAlphaNum, string));
@@ -11434,21 +11713,55 @@ var $author$project$Main$updateInput = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
+			case 'Noop':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'OnInputChange':
 				var string = msg.a;
 				return _Utils_Tuple2(
 					A2($author$project$Main$updateInput, string, model),
 					$elm$core$Platform$Cmd$none);
 			case 'TriggerAddItem':
+				var newModel = $author$project$Main$resetInput(
+					$author$project$Main$addItemFromInput(model));
 				return _Utils_Tuple2(
-					$author$project$Main$resetInput(
-						$author$project$Main$addItemFromInput(model)),
-					$elm$core$Platform$Cmd$none);
-			default:
+					newModel,
+					A2(
+						$author$project$Ports$LocalStorage$save,
+						$author$project$Todo$Save$V1(newModel.items),
+						$author$project$Main$storage));
+			case 'TriggerRemoveItem':
 				var item = msg.a;
+				var newModel = A2($author$project$Main$removeItem, item, model);
 				return _Utils_Tuple2(
-					A2($author$project$Main$removeItem, item, model),
-					$elm$core$Platform$Cmd$none);
+					newModel,
+					A2(
+						$author$project$Ports$LocalStorage$save,
+						$author$project$Todo$Save$V1(newModel.items),
+						$author$project$Main$storage));
+			default:
+				var result = msg.a;
+				switch (result.$) {
+					case 'Found':
+						var save = result.a;
+						var items = save.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{items: items}),
+							$elm$core$Platform$Cmd$none);
+					case 'NotStored':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{items: _List_Nil}),
+							$author$project$Ports$Log$string('NotStored'));
+					default:
+						var err = result.a;
+						return _Utils_Tuple2(
+							model,
+							$author$project$Ports$Log$string(
+								'Storage Error: ' + $elm$core$Debug$toString(err)));
+				}
 		}
 	});
 var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
@@ -11609,9 +11922,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 };
 var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
 var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
 	return {$: 'MayPreventDefault', a: a};
 };
@@ -11622,7 +11932,6 @@ var $elm$html$Html$Events$preventDefaultOn = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
 	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $mdgriffith$elm_ui$Element$Input$onKey = F2(
 	function (desiredCode, msg) {
 		var decode = function (code) {
@@ -12153,15 +12462,6 @@ var $Gizra$elm_keyboard_event$Keyboard$Event$KeyboardEvent = F7(
 		return {altKey: altKey, ctrlKey: ctrlKey, key: key, keyCode: keyCode, metaKey: metaKey, repeat: repeat, shiftKey: shiftKey};
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $elm$json$Json$Decode$maybe = function (decoder) {
-	return $elm$json$Json$Decode$oneOf(
-		_List_fromArray(
-			[
-				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
-				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
-			]));
-};
 var $Gizra$elm_keyboard_event$Keyboard$Event$decodeKey = $elm$json$Json$Decode$maybe(
 	A2(
 		$elm$json$Json$Decode$andThen,
@@ -12169,7 +12469,6 @@ var $Gizra$elm_keyboard_event$Keyboard$Event$decodeKey = $elm$json$Json$Decode$m
 			return $elm$core$String$isEmpty(key) ? $elm$json$Json$Decode$fail('empty key') : $elm$json$Json$Decode$succeed(key);
 		},
 		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
-var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $Gizra$elm_keyboard_event$Keyboard$Event$decodeNonZero = A2(
 	$elm$json$Json$Decode$andThen,
 	function (code) {
@@ -12590,8 +12889,6 @@ var $author$project$Todo$Urgency$getDisplayData = function (urg) {
 			return _Utils_Tuple2($avh4$elm_color$Color$darkGreen, 'WHENEVER');
 		case 'Eventually':
 			return _Utils_Tuple2($avh4$elm_color$Color$darkYellow, 'EVENTUALLY');
-		case 'Deadline':
-			return _Utils_Tuple2($avh4$elm_color$Color$orange, 'DEADLINE ???');
 		case 'Soon':
 			return _Utils_Tuple2($avh4$elm_color$Color$orange, 'SOON');
 		default:
