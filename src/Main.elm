@@ -128,7 +128,9 @@ mobile model =
         , fontSize
         , El.inFront
             (El.el
-                [ El.padding 8, El.width El.fill ]
+                [ El.padding 8
+                , El.width El.fill
+                ]
                 (mobileItemInput [ El.width El.fill ]
                     model.inputValue
                 )
