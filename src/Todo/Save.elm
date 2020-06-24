@@ -1,4 +1,4 @@
-module Todo.Save exposing (Format(..), decoder, encode)
+module Todo.Save exposing (Format, decoder, deformat, encode, format)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
@@ -9,9 +9,19 @@ type Format
     = V1 (List Item)
 
 
+format : List Item -> Format
+format items =
+    V1 items
+
+
+deformat : Format -> List Item
+deformat (V1 items) =
+    items
+
+
 encode : Format -> Value
-encode format =
-    case format of
+encode save =
+    case save of
         V1 list ->
             Encode.object
                 [ ( "version", Encode.int 1 )

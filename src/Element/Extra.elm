@@ -3,14 +3,16 @@ module Element.Extra exposing
     , backgroundColor
     , borderColor
     , document
-    , elText
     , fontColor
     , mapDocument
+    , onDeviceResize
     , onEnter
+    , text
     , toElementColor
     )
 
 import Browser
+import Browser.Events
 import Color exposing (Color)
 import Element exposing (Attr, Attribute, Element, Option, layoutWith)
 import Element.Background
@@ -71,8 +73,8 @@ mapDocument toMsg doc =
     }
 
 
-elText : List (Attribute msg) -> String -> Element msg
-elText attrs string =
+text : List (Attribute msg) -> String -> Element msg
+text attrs string =
     Element.el attrs <| Element.text string
 
 
@@ -99,6 +101,14 @@ toElementColor color =
            )
 
 
+attributes :
+    List (Element.Attribute msg)
+    -> List (Maybe (Element.Attribute msg))
+    -> List (Element.Attribute msg)
+attributes required optional =
+    required ++ List.filterMap identity optional
+
+
 onEnter : msg -> Attribute msg
 onEnter msg =
     onlyForKey Key.Enter msg
@@ -114,3 +124,14 @@ onlyForKey key msg keyEvent =
 
     else
         Nothing
+
+
+onDeviceResize : (Element.Device -> msg) -> Sub msg
+onDeviceResize handler =
+    Browser.Events.onResize
+        (\w h ->
+            (handler << Element.classifyDevice)
+                { width = w
+                , height = h
+                }
+        )

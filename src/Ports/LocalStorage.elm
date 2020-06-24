@@ -1,6 +1,6 @@
 module Ports.LocalStorage exposing
     ( Config
-    , Error
+    , Error(..)
     , StorageResult(..)
     , config
     , register
@@ -68,6 +68,7 @@ request (Config key _ _) =
 register : (StorageResult a -> msg) -> Config a -> Ports.Listeners msg -> Ports.Listeners msg
 register handler (Config key _ decoder) listeners =
     let
+        listener : Value -> msg
         listener =
             Decode.decodeValue (Decode.maybe decoder)
                 >> toStorageResult

@@ -1,11 +1,13 @@
 module Main exposing (main)
 
+import Browser.Events
 import Color exposing (Color)
-import Element as El exposing (Attribute, Element)
+import Element as El exposing (Attribute, Device, DeviceClass(..), Element, Orientation(..))
 import Element.Border as ElBr
 import Element.Extra as Elx exposing (Document)
 import Element.Font as Elf
 import Element.Input as Eli exposing (Placeholder)
+import Json.Decode as Decode
 import Ports
 import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
 import Ports.Log as Log
@@ -24,6 +26,7 @@ import Util exposing (applyTuple, tern)
 type alias Model =
     { inputValue : Maybe Item
     , items : List Item
+    , device : Device
     }
 
 
@@ -31,10 +34,19 @@ type alias Model =
 -- INIT
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+type alias Flags =
+    { screen :
+        { width : Int
+        , height : Int
+        }
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     ( { inputValue = Nothing
       , items = []
+      , device = El.classifyDevice flags.screen
       }
     , LocalStorage.request storage
     )
@@ -64,16 +76,149 @@ transparent =
 
 view : Model -> Document Msg
 view model =
+    case
+        ( model.device.class
+        , model.device.orientation
+        )
+    of
+        ( Phone, Portrait ) ->
+            mobile model
+
+        ( _, _ ) ->
+            desktop model
+
+
+title : String
+title =
+    "Todo App"
+
+
+bgColor : Attribute Msg
+bgColor =
+    Elx.backgroundColor Color.darkCharcoal
+
+
+fontColor : Attribute Msg
+fontColor =
+    Elx.fontColor Color.white
+
+
+fontFamily : Attribute Msg
+fontFamily =
+    Elf.family
+        [ Elf.typeface "Lucida Console"
+        , Elf.typeface "Monaco"
+        , Elf.monospace
+        ]
+
+
+fontSize : Attribute Msg
+fontSize =
+    Elf.size 16
+
+
+mobile : Model -> Document Msg
+mobile model =
     { title = "Todo App"
     , options = [ El.focusStyle focusStyle ]
     , attributes =
-        [ Elx.backgroundColor Color.darkCharcoal
-        , Elx.fontColor Color.white
-        , Elf.family
-            [ Elf.typeface "Lucida Console"
-            , Elf.typeface "Monaco"
-            , Elf.monospace
+        [ bgColor
+        , fontColor
+        , fontFamily
+        , fontSize
+        , El.inFront
+            (El.el
+                [ El.padding 8, El.width El.fill ]
+                (itemInput [ El.width El.fill ]
+                    model.inputValue
+                )
+            )
+        ]
+    , body =
+        El.column
+            [ El.paddingXY 8 70
+            , El.spacing 16
+            , El.width El.fill
             ]
+            (List.reverse (List.map renderItemCard model.items))
+    }
+
+
+renderItemCard : Item -> Element Msg
+renderItemCard item =
+    let
+        pad =
+            6
+
+        ( importanceColor, importanceText ) =
+            Importance.getDisplayData (Item.getImportance item)
+
+        ( urgencyColor, urgencyText ) =
+            Urgency.getDisplayData (Item.getUrgency item)
+    in
+    El.row
+        [ El.width El.fill
+        , El.height El.shrink
+        , rounded
+        , shadowStyle
+        , Elx.backgroundColor Color.blue
+        ]
+        [ El.column
+            [ El.width (El.fillPortion 6)
+            , El.padding pad
+            , El.spacing pad
+            , roundEach
+                { topLeft = True
+                , bottomLeft = True
+                , topRight = False
+                , bottomRight = False
+                }
+            ]
+            [ El.row [ El.width El.fill, El.spacing pad ]
+                [ importanceBadge [] (Item.getImportance item)
+                , urgencyBadge [] (Item.getUrgency item)
+                ]
+            , Elx.text []
+                (Item.getDetails item)
+            ]
+        , Eli.button
+            [ El.width (El.fillPortion 1)
+            , El.height El.fill
+            , Elx.backgroundColor Color.red
+            , Elx.borderColor transparent
+            , ElBr.width 2
+            , roundEach
+                { topRight = True
+                , bottomRight = True
+                , bottomLeft = False
+                , topLeft = False
+                }
+            , El.focused
+                [ Elx.borderColor Color.red
+                , Elx.fontColor Color.red
+                , Elx.backgroundColor Color.darkCharcoal
+                ]
+            ]
+            { onPress = Just (TriggerRemoveItem item)
+            , label =
+                Elx.text
+                    [ El.centerX
+                    , El.centerY
+                    ]
+                    "X"
+            }
+        ]
+
+
+desktop : Model -> Document Msg
+desktop model =
+    { title = "Todo App"
+    , options = [ El.focusStyle focusStyle ]
+    , attributes =
+        [ bgColor
+        , fontColor
+        , fontFamily
+        , fontSize
         ]
     , body =
         El.column
@@ -81,7 +226,12 @@ view model =
             , El.height El.fill
             , El.spacing 16
             ]
-            (mainInput model.inputValue
+            (itemInput
+                [ El.centerX
+                , El.centerY
+                , El.width (El.minimum 480 El.shrink)
+                ]
+                model.inputValue
                 :: List.reverse (List.map renderItem model.items)
             )
     }
@@ -105,15 +255,14 @@ shadowStyle =
         }
 
 
-mainInput : Maybe Item -> Element Msg
-mainInput item =
+itemInput : List (Attribute Msg) -> Maybe Item -> Element Msg
+itemInput attrs item =
     El.row
-        [ El.centerX
-        , El.centerY
-        , El.width (El.minimum 480 El.shrink)
-        , shadowStyle
-        , rounded
-        ]
+        ([ shadowStyle
+         , rounded
+         ]
+            ++ attrs
+        )
         [ textBox item
         , addButton
         ]
@@ -138,10 +287,6 @@ textBox item =
                     |> Maybe.map List.singleton
                     |> Maybe.withDefault []
                )
-         -- ++ (Maybe.map (El.above << debugTokens) item
-         --         |> Maybe.map List.singleton
-         --         |> Maybe.withDefault []
-         --    )
         )
         { onChange = OnInputChange
         , text =
@@ -173,7 +318,7 @@ addButton =
             ]
         ]
         { onPress = Just TriggerAddItem
-        , label = Elx.elText [ El.centerX, El.centerY, El.paddingXY 8 0 ] "add"
+        , label = Elx.text [ El.centerX, El.centerY, El.paddingXY 8 0 ] "add"
         }
 
 
@@ -186,9 +331,9 @@ renderItem item =
         , El.centerY
         , El.width El.shrink
         ]
-        [ importanceBadge (Item.getImportance item)
-        , urgencyBadge (Item.getUrgency item)
-        , badge Color.blue (Item.getDetails item)
+        [ importanceBadge [ shadowStyle ] (Item.getImportance item)
+        , urgencyBadge [ shadowStyle ] (Item.getUrgency item)
+        , detailsBadge [ shadowStyle ] (Item.getDetails item)
         , removeButton item
         ]
 
@@ -229,32 +374,43 @@ renderParsed attributes item =
          ]
             ++ attributes
         )
-        [ importanceBadge (Item.getImportance item)
-        , urgencyBadge (Item.getUrgency item)
+        [ importanceBadge [ shadowStyle ] (Item.getImportance item)
+        , urgencyBadge [ shadowStyle ] (Item.getUrgency item)
         ]
 
 
-importanceBadge : Importance -> Element msg
-importanceBadge importance =
-    Importance.getDisplayData importance
-        |> applyTuple badge
+importanceBadge : List (Attribute Msg) -> Importance -> Element Msg
+importanceBadge attrs importance =
+    let
+        ( color, text ) =
+            Importance.getDisplayData importance
+    in
+    badge ([ Elx.backgroundColor color ] ++ attrs) text
 
 
-urgencyBadge : Urgency -> Element msg
-urgencyBadge urgency =
-    Urgency.getDisplayData urgency
-        |> applyTuple badge
+urgencyBadge : List (Attribute Msg) -> Urgency -> Element Msg
+urgencyBadge attrs urgency =
+    let
+        ( color, text ) =
+            Urgency.getDisplayData urgency
+    in
+    badge ([ Elx.backgroundColor color ] ++ attrs) text
 
 
-badge : Color.Color -> String -> Element msg
-badge color string =
-    Elx.elText
-        [ Elx.backgroundColor color
-        , rounded
-        , El.padding 4
-        , El.centerY
-        , shadowStyle
-        ]
+detailsBadge : List (Attribute Msg) -> String -> Element Msg
+detailsBadge attrs =
+    badge ([ Elx.backgroundColor Color.blue ] ++ attrs)
+
+
+badge : List (Attribute Msg) -> String -> Element Msg
+badge attrs string =
+    Elx.text
+        ([ rounded
+         , El.padding 4
+         , El.centerY
+         ]
+            ++ attrs
+        )
         string
 
 
@@ -309,39 +465,17 @@ roundLeftSideOnly =
 
 
 
--- DEBUG STUFF, NEED TO REMOVE!
-
-
-debugTokens : Item -> Element msg
-debugTokens item =
-    El.row []
-        (List.map debugToken
-            (Token.tokenize (Item.getRawText item))
-        )
-
-
-debugToken : Token -> Element msg
-debugToken token =
-    case token of
-        Imp _ imp ->
-            importanceBadge imp
-
-        Urg _ urg ->
-            urgencyBadge urg
-
-        Txt txt ->
-            badge Color.blue txt
-
-
-
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Ports.noopListener Noop
-        |> LocalStorage.register OnLocalStorageLoad storage
-        |> Ports.asSubscriptions
+    Sub.batch
+        [ Ports.noopListener Noop
+            |> LocalStorage.register OnLocalStorageLoad storage
+            |> Ports.asSubscriptions
+        , Browser.Events.onResize (\w h -> OnDeviceResize <| Ok <| El.classifyDevice { width = w, height = h })
+        ]
 
 
 
@@ -354,6 +488,7 @@ type Msg
     | TriggerAddItem
     | TriggerRemoveItem Item
     | OnLocalStorageLoad (StorageResult Save.Format)
+    | OnDeviceResize (Result Decode.Error Device)
 
 
 
@@ -367,7 +502,7 @@ update msg model =
             ( model, Cmd.none )
 
         OnInputChange string ->
-            ( model |> updateInput string
+            ( updateInput string model
             , Cmd.none
             )
 
@@ -379,34 +514,57 @@ update msg model =
                         |> resetInput
             in
             ( newModel
-            , storage |> LocalStorage.save (Save.V1 newModel.items)
+            , saveCmd newModel.items
             )
 
         TriggerRemoveItem item ->
             let
                 newModel =
-                    model |> removeItem item
+                    removeItem item model
             in
             ( newModel
-            , storage |> LocalStorage.save (Save.V1 newModel.items)
+            , saveCmd newModel.items
             )
 
-        OnLocalStorageLoad result ->
-            case result of
-                Found save ->
-                    case save of
-                        Save.V1 items ->
-                            ( { model | items = items }, Cmd.none )
+        OnLocalStorageLoad (Found save) ->
+            ( { model | items = Save.deformat save }
+            , Cmd.none
+            )
 
-                NotStored ->
-                    ( { model | items = [] }, Log.string "NotStored" )
+        OnLocalStorageLoad NotStored ->
+            ( { model | items = [] }
+            , Log.string "I couldn't find a save!"
+            )
 
-                StorageErr err ->
-                    ( model, Log.string ("Storage Error: " ++ Debug.toString err) )
+        OnLocalStorageLoad (StorageErr (LocalStorage.JsonError err)) ->
+            ( model
+            , Log.string
+                ("Error Loading Save: "
+                    ++ Decode.errorToString err
+                )
+            )
+
+        OnDeviceResize (Ok device) ->
+            ( { model | device = device }
+            , Cmd.none
+            )
+
+        OnDeviceResize (Err err) ->
+            ( model
+            , Log.string
+                ("Error Resizing Window: "
+                    ++ Decode.errorToString err
+                )
+            )
 
 
 
 -- UPDATE UTILITY
+
+
+saveCmd : List Item -> Cmd Msg
+saveCmd items =
+    LocalStorage.save (Save.format items) storage
 
 
 updateInput : String -> Model -> Model
@@ -423,7 +581,7 @@ addItemFromInput model =
         Just item ->
             { model
                 | items =
-                    if model.items |> List.any (Item.equals item) then
+                    if model.items |> contains item then
                         model.items
 
                     else
@@ -433,6 +591,11 @@ addItemFromInput model =
 
         Nothing ->
             model
+
+
+contains : Item -> List Item -> Bool
+contains item =
+    List.any (Item.equals item)
 
 
 resetInput : Model -> Model
@@ -452,7 +615,7 @@ removeItem item model =
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Elx.document
         { init = init

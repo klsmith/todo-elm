@@ -3,6 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="initial-scale=1.0">
   <script type="text/javascript" src="app.js"></script>
   <script type="text/javascript" src="ports.js"></script>
 </head>
@@ -13,6 +15,12 @@
     // initialize the elm app
     var elmApp = Elm.Main.init({
       node: document.getElementById('app'),
+      flags: {
+        screen: {
+          width: window.screen.width,
+          height: window.screen.height
+        }
+      }
     });
     addPorts(elmApp);
 
