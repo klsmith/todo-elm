@@ -245,8 +245,10 @@ renderItemCard item =
                 [ importanceBadge [] (Item.getImportance item)
                 , urgencyBadge [] (Item.getUrgency item)
                 ]
-            , Elx.text []
-                (Item.getDetails item)
+            , El.paragraph []
+                [ El.text
+                    (Item.getDetails item)
+                ]
             ]
         , Eli.button
             [ El.width (El.fillPortion 1)
