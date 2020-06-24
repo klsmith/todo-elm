@@ -14383,6 +14383,25 @@ var $author$project$Main$mobileItemInput = F2(
 					$author$project$Main$mobileAddButton
 				]));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
+var $mdgriffith$elm_ui$Element$paragraph = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asParagraph,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$spacing(5),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
 var $author$project$Main$renderItemCard = function (item) {
 	var pad = 6;
 	var _v0 = $author$project$Todo$Urgency$getDisplayData(
@@ -14437,9 +14456,13 @@ var $author$project$Main$renderItemCard = function (item) {
 								$author$project$Todo$Item$getUrgency(item))
 							])),
 						A2(
-						$author$project$Element$Extra$text,
+						$mdgriffith$elm_ui$Element$paragraph,
 						_List_Nil,
-						$author$project$Todo$Item$getDetails(item))
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$text(
+								$author$project$Todo$Item$getDetails(item))
+							]))
 					])),
 				A2(
 				$mdgriffith$elm_ui$Element$Input$button,
