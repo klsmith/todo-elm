@@ -129,7 +129,7 @@ mobile model =
         , El.inFront
             (El.el
                 [ El.padding 8, El.width El.fill ]
-                (itemInput [ El.width El.fill ]
+                (mobileItemInput [ El.width El.fill ]
                     model.inputValue
                 )
             )
@@ -142,6 +142,73 @@ mobile model =
             ]
             (List.reverse (List.map renderItemCard model.items))
     }
+
+
+mobileItemInput : List (Attribute Msg) -> Maybe Item -> Element Msg
+mobileItemInput attrs item =
+    El.row
+        ([ shadowStyle
+         , rounded
+         ]
+            ++ attrs
+        )
+        [ mobileTextBox item
+        , mobileAddButton
+        ]
+
+
+mobileTextBox : Maybe Item -> Element Msg
+mobileTextBox item =
+    Eli.text
+        ([ Elx.onEnter TriggerAddItem
+         , Elx.backgroundColor Color.charcoal
+         , El.width (El.fillPortion 5)
+         , ElBr.widthEach
+            { left = 2
+            , top = 2
+            , bottom = 2
+            , right = 1
+            }
+         , Elx.borderColor transparent
+         , roundLeftSideOnly
+         ]
+            ++ (Maybe.map (El.below << renderParsed []) item
+                    |> Maybe.map List.singleton
+                    |> Maybe.withDefault []
+               )
+        )
+        { onChange = OnInputChange
+        , text =
+            Maybe.map Item.getRawText item
+                |> Maybe.withDefault ""
+        , placeholder = justPlaceholderText "add things to your todo list"
+        , label = Eli.labelHidden "main input text box"
+        }
+
+
+mobileAddButton : Element Msg
+mobileAddButton =
+    Eli.button
+        [ Elx.backgroundColor Color.darkGreen
+        , ElBr.widthEach
+            { left = 1
+            , top = 2
+            , bottom = 2
+            , right = 2
+            }
+        , Elx.borderColor transparent
+        , roundRightSideOnly
+        , El.width (El.fillPortion 1)
+        , El.height El.fill
+        , El.focused
+            [ Elx.borderColor Color.darkGreen
+            , Elx.fontColor Color.darkGreen
+            , Elx.backgroundColor Color.darkCharcoal
+            ]
+        ]
+        { onPress = Just TriggerAddItem
+        , label = Elx.text [ El.centerX, El.centerY, El.paddingXY 8 0 ] "add"
+        }
 
 
 renderItemCard : Item -> Element Msg
