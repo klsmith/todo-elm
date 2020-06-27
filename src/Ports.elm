@@ -1,6 +1,6 @@
 port module Ports exposing (JsMsg, Listener, listen, send)
 
-import Dict exposing (Dict)
+import Dict
 import Json.Decode exposing (Value)
 
 

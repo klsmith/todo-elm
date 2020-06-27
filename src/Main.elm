@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Browser.Events
 import Color exposing (Color)
 import Element as El exposing (Attribute, Device, DeviceClass(..), Element, Orientation(..))
 import Element.Border as ElBr
@@ -15,9 +14,9 @@ import Ports.Log as Log
 import Todo.Importance as Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
 import Todo.Save as Save
-import Todo.Token as Token exposing (Token(..))
+import Todo.Token exposing (Token(..))
 import Todo.Urgency as Urgency exposing (Urgency(..))
-import Util exposing (applyTuple, tern)
+import Util exposing (tern)
 
 
 
@@ -36,10 +35,8 @@ type alias Model =
 
 
 type alias Flags =
-    { screen :
-        { width : Int
-        , height : Int
-        }
+    { width : Int
+    , height : Int
     }
 
 
@@ -47,7 +44,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { inputValue = Nothing
       , items = []
-      , device = El.classifyDevice flags.screen
+      , device = El.classifyDevice flags
       }
     , LocalStorage.request storage
     )
@@ -120,7 +117,7 @@ fontSize =
 
 mobile : Model -> Document Msg
 mobile model =
-    { title = "Todo App"
+    { title = title
     , options = [ El.focusStyle focusStyle ]
     , attributes =
         [ bgColor
@@ -219,12 +216,6 @@ renderItemCard item =
     let
         pad =
             6
-
-        ( importanceColor, importanceText ) =
-            Importance.getDisplayData (Item.getImportance item)
-
-        ( urgencyColor, urgencyText ) =
-            Urgency.getDisplayData (Item.getUrgency item)
     in
     El.row
         [ El.width El.fill
@@ -298,7 +289,7 @@ textWrapCSS =
 
 desktop : Model -> Document Msg
 desktop model =
-    { title = "Todo App"
+    { title = title
     , options = [ El.focusStyle focusStyle ]
     , attributes =
         [ bgColor
@@ -471,7 +462,7 @@ importanceBadge attrs importance =
         ( color, text ) =
             Importance.getDisplayData importance
     in
-    badge ([ Elx.backgroundColor color ] ++ attrs) text
+    badge (Elx.backgroundColor color :: attrs) text
 
 
 urgencyBadge : List (Attribute Msg) -> Urgency -> Element Msg
@@ -480,12 +471,12 @@ urgencyBadge attrs urgency =
         ( color, text ) =
             Urgency.getDisplayData urgency
     in
-    badge ([ Elx.backgroundColor color ] ++ attrs) text
+    badge (Elx.backgroundColor color :: attrs) text
 
 
 detailsBadge : List (Attribute Msg) -> String -> Element Msg
 detailsBadge attrs =
-    badge ([ Elx.backgroundColor Color.blue ] ++ attrs)
+    badge (Elx.backgroundColor Color.blue :: attrs)
 
 
 badge : List (Attribute Msg) -> String -> Element Msg

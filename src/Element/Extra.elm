@@ -12,7 +12,6 @@ module Element.Extra exposing
     )
 
 import Browser
-import Browser.Events
 import Color exposing (Color)
 import Element exposing (Attr, Attribute, Element, Option, layoutWith)
 import Element.Background
@@ -100,14 +99,6 @@ toElementColor color =
         |> (\{ red, green, blue, alpha } ->
                 Element.rgba red green blue alpha
            )
-
-
-attributes :
-    List (Element.Attribute msg)
-    -> List (Maybe (Element.Attribute msg))
-    -> List (Element.Attribute msg)
-attributes required optional =
-    required ++ List.filterMap identity optional
 
 
 onEnter : msg -> Attribute msg

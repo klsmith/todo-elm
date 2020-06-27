@@ -6,7 +6,9 @@ import Ports
 
 
 type alias Screen =
-    { width : Int, height : Int }
+    { width : Int
+    , height : Int
+    }
 
 
 onResize : (Result Decode.Error Element.Device -> msg) -> Ports.Listener msg
