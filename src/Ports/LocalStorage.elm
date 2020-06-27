@@ -3,7 +3,7 @@ module Ports.LocalStorage exposing
     , Error(..)
     , StorageResult(..)
     , config
-    , register
+    , listener
     , request
     , save
     )
@@ -65,16 +65,15 @@ request (Config key _ _) =
     Ports.send ( "Ports.LocalStorage.request", Encode.string key )
 
 
-register : (StorageResult a -> msg) -> Config a -> Ports.Listeners msg -> Ports.Listeners msg
-register handler (Config key _ decoder) listeners =
+listener : (StorageResult a -> msg) -> Config a -> Ports.Listener msg
+listener handler (Config key _ decoder) =
     let
-        listener : Value -> msg
-        listener =
+        callback =
             Decode.decodeValue (Decode.maybe decoder)
                 >> toStorageResult
                 >> handler
     in
-    listeners |> Ports.register ("Ports.LocalStorage.listen." ++ key) listener
+    ( "Ports.LocalStorage.listen." ++ key, callback )
 
 
 toStorageResult : Result Decode.Error (Maybe a) -> StorageResult a

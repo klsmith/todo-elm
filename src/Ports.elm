@@ -1,53 +1,53 @@
-port module Ports exposing (JsMsg, Listeners, asSubscriptions, noopListener, register, send)
+port module Ports exposing (JsMsg, Listener, listen, send)
 
 import Dict exposing (Dict)
 import Json.Decode exposing (Value)
 
 
 
--- HIDDEN PORTS
+-- RAW PORTS
 
 
-port send : JsMsg -> Cmd msg
+port elmToJs : ( String, Value ) -> Cmd msg
 
 
-port listen : (JsMsg -> msg) -> Sub msg
+port jsToElm : (( String, Value ) -> msg) -> Sub msg
 
 
 
--- HIDDEN PORT TYPES
+-- TYPES
 
 
 type alias JsMsg =
     ( String, Value )
 
 
-
--- LISTENERS
-
-
-type Listeners msg
-    = Listeners msg (Dict String (Value -> msg))
+type alias Listener msg =
+    ( String, Value -> msg )
 
 
-noopListener : msg -> Listeners msg
-noopListener noop =
-    Listeners noop Dict.empty
+
+-- INTERFACE
 
 
-register : String -> (Value -> msg) -> Listeners msg -> Listeners msg
-register msg listener (Listeners noop listeners) =
-    Listeners noop (listeners |> Dict.insert msg listener)
+send : JsMsg -> Cmd msg
+send =
+    elmToJs
 
 
-asSubscriptions : Listeners msg -> Sub msg
-asSubscriptions (Listeners noop listeners) =
-    listen
-        (\( msg, value ) ->
-            case Dict.get msg listeners of
-                Just listener ->
-                    listener value
+listen : msg -> List (Listener msg) -> Sub msg
+listen noop listeners =
+    let
+        callbacks =
+            Dict.fromList listeners
 
-                Nothing ->
-                    noop
-        )
+        router =
+            \( msg, value ) ->
+                case Dict.get msg callbacks of
+                    Just callback ->
+                        callback value
+
+                    Nothing ->
+                        noop
+    in
+    jsToElm router

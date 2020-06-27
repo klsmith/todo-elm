@@ -9,6 +9,7 @@ import Element.Font as Elf
 import Element.Input as Eli exposing (Placeholder)
 import Json.Decode as Decode
 import Ports
+import Ports.Device as Device
 import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
 import Ports.Log as Log
 import Todo.Importance as Importance exposing (Importance(..))
@@ -542,10 +543,10 @@ roundLeftSideOnly =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ Ports.noopListener Noop
-            |> LocalStorage.register OnLocalStorageLoad storage
-            |> Ports.asSubscriptions
-        , Browser.Events.onResize (\w h -> OnDeviceResize <| Ok <| El.classifyDevice { width = w, height = h })
+        [ Ports.listen Noop
+            [ LocalStorage.listener OnLocalStorageLoad storage
+            , Device.onResize OnDeviceResize
+            ]
         ]
 
 
@@ -617,7 +618,7 @@ update msg model =
 
         OnDeviceResize (Ok device) ->
             ( { model | device = device }
-            , Cmd.none
+            , Log.string ("NEW DEVICE: " ++ Debug.toString device)
             )
 
         OnDeviceResize (Err err) ->

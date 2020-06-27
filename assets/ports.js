@@ -3,12 +3,12 @@
  */
 function addPorts(elmApp) {
 
-  /*** LISTENER SETUP (listens for "send" Cmd from Ports.elm) ***/
+  /*** ELM TO JS PORT ***/
 
-  if (elmApp.ports && elmApp.ports.send) {
-    elmApp.ports.send.subscribe(listen);
+  if (elmApp.ports && elmApp.ports.elmToJs) {
+    elmApp.ports.elmToJs.subscribe(listen);
   } else {
-    console.log("JS: Ports.send not hooked up on the Elm side!")
+    console.log("ELM to JS port NOT hooked up on the ELM side!")
   }
 
   var listeners = {};
@@ -17,17 +17,17 @@ function addPorts(elmApp) {
     if (listeners[msg]) {
       listeners[msg](value);
     } else {
-      console.log("JS: Received Junk Msg from Elm: ", msg)
+      console.log("JS received junk msg from ELM: ", msg)
     }
   }
 
-  /*** SEND SETUP (send to "listen" Sub in Ports.elm) ***/
+  /*** JS TO ELM PORT ***/
 
   function send(msg, value) {
-    if (elmApp.ports && elmApp.ports.listen) {
-      elmApp.ports.listen.send([msg, value]);
+    if (elmApp.ports && elmApp.ports.jsToElm) {
+      elmApp.ports.jsToElm.send([msg, value]);
     } else {
-      console.log("JS: Ports.listen hooked up on the Elm side!")
+      console.log(msg + ": JS TO ELM port NOT hooked up on the ELM side!")
     }
   }
 
@@ -53,4 +53,12 @@ function addPorts(elmApp) {
       listeners["Ports.LocalStorage.request"](key);
     };
 
+  /*** SCREEN PORT LOGIC ***/
+  window.addEventListener("resize",
+    function() {
+      send("Ports.Screen.onResize", {
+        width: window.screen.width,
+        height: window.screen.height
+      })
+    });
 }
