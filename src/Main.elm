@@ -232,6 +232,7 @@ renderItemCard item =
         , rounded
         , shadowStyle
         , Elx.backgroundColor Color.blue
+        , El.clip
         ]
         [ El.column
             [ El.width (El.fillPortion 6)
@@ -244,20 +245,12 @@ renderItemCard item =
                 , bottomRight = False
                 }
             ]
-            [ El.row [ El.width El.fill, El.spacing pad ]
+            [ El.wrappedRow [ El.width El.fill, El.spacing pad ]
                 [ importanceBadge [] (Item.getImportance item)
                 , urgencyBadge [] (Item.getUrgency item)
                 ]
             , El.paragraph
-                (Elx.css
-                    [ ( "-ms-word-break", "break-all" )
-                    , ( "word-break", "break-all" )
-                    , ( "word-break", "break-word" )
-                    , ( "-webkit-hyphens", "auto" )
-                    , ( "-moz-hyphens", "auto" )
-                    , ( "hyphens", "auto" )
-                    ]
-                )
+                textWrapCSS
                 [ El.text
                     (Item.getDetails item)
                 ]
@@ -288,6 +281,18 @@ renderItemCard item =
                     ]
                     "X"
             }
+        ]
+
+
+textWrapCSS : List (Attribute Msg)
+textWrapCSS =
+    Elx.css
+        [ ( "-ms-word-break", "break-all" )
+        , ( "word-break", "break-all" )
+        , ( "word-break", "break-word" )
+        , ( "-webkit-hyphens", "auto" )
+        , ( "-moz-hyphens", "auto" )
+        , ( "hyphens", "auto" )
         ]
 
 
