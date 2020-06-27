@@ -2,10 +2,10 @@ module Element.Extra exposing
     ( Document
     , backgroundColor
     , borderColor
+    , css
     , document
     , fontColor
     , mapDocument
-    , onDeviceResize
     , onEnter
     , text
     , toElementColor
@@ -18,6 +18,7 @@ import Element exposing (Attr, Attribute, Element, Option, layoutWith)
 import Element.Background
 import Element.Border
 import Element.Font
+import Html.Attributes
 import Html.Events
 import Keyboard.Event exposing (KeyboardEvent, considerKeyboardEvent)
 import Keyboard.Key as Key exposing (Key)
@@ -126,12 +127,10 @@ onlyForKey key msg keyEvent =
         Nothing
 
 
-onDeviceResize : (Element.Device -> msg) -> Sub msg
-onDeviceResize handler =
-    Browser.Events.onResize
-        (\w h ->
-            (handler << Element.classifyDevice)
-                { width = w
-                , height = h
-                }
+css : List ( String, String ) -> List (Attribute msg)
+css =
+    List.map
+        (\( name, value ) ->
+            Element.htmlAttribute
+                (Html.Attributes.style name value)
         )

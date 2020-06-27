@@ -56,7 +56,7 @@ function addPorts(elmApp) {
   /*** SCREEN PORT LOGIC ***/
   window.addEventListener("resize",
     function() {
-      send("Ports.Screen.onResize", {
+      send("Ports.Device.onResize", {
         width: window.screen.width,
         height: window.screen.height
       })

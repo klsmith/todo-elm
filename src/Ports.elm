@@ -35,8 +35,8 @@ send =
     elmToJs
 
 
-listen : msg -> List (Listener msg) -> Sub msg
-listen noop listeners =
+listen : (String -> msg) -> List (Listener msg) -> Sub msg
+listen onBadMsg listeners =
     let
         callbacks =
             Dict.fromList listeners
@@ -48,6 +48,6 @@ listen noop listeners =
                         callback value
 
                     Nothing ->
-                        noop
+                        onBadMsg msg
     in
     jsToElm router

@@ -248,7 +248,16 @@ renderItemCard item =
                 [ importanceBadge [] (Item.getImportance item)
                 , urgencyBadge [] (Item.getUrgency item)
                 ]
-            , El.paragraph []
+            , El.paragraph
+                (Elx.css
+                    [ ( "-ms-word-break", "break-all" )
+                    , ( "word-break", "break-all" )
+                    , ( "word-break", "break-word" )
+                    , ( "-webkit-hyphens", "auto" )
+                    , ( "-moz-hyphens", "auto" )
+                    , ( "hyphens", "auto" )
+                    ]
+                )
                 [ El.text
                     (Item.getDetails item)
                 ]
@@ -543,7 +552,7 @@ roundLeftSideOnly =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ Ports.listen Noop
+        [ Ports.listen OnBadPortMsg
             [ LocalStorage.listener OnLocalStorageLoad storage
             , Device.onResize OnDeviceResize
             ]
@@ -555,7 +564,7 @@ subscriptions _ =
 
 
 type Msg
-    = Noop
+    = OnBadPortMsg String
     | OnInputChange String
     | TriggerAddItem
     | TriggerRemoveItem Item
@@ -570,8 +579,10 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Noop ->
-            ( model, Cmd.none )
+        OnBadPortMsg badMsg ->
+            ( model
+            , Log.string ("ELM received junk msg from JS: " ++ badMsg)
+            )
 
         OnInputChange string ->
             ( updateInput string model
@@ -617,9 +628,7 @@ update msg model =
             )
 
         OnDeviceResize (Ok device) ->
-            ( { model | device = device }
-            , Log.string ("NEW DEVICE: " ++ Debug.toString device)
-            )
+            ( { model | device = device }, Cmd.none )
 
         OnDeviceResize (Err err) ->
             ( model
