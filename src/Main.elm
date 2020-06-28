@@ -121,12 +121,8 @@ view model =
         "Todo App"
     , options =
         [ El.focusStyle
-            { borderColor =
-                Just
-                    (Elx.toElementColor lightCharcoal)
-            , backgroundColor =
-                Just
-                    (Elx.toElementColor darkCharcoal)
+            { borderColor = Just (Elx.toElementColor lightCharcoal)
+            , backgroundColor = Just (Elx.toElementColor darkCharcoal)
             , shadow = Nothing
             }
         ]
