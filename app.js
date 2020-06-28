@@ -11050,8 +11050,8 @@ var $mdgriffith$elm_ui$Element$classifyDevice = function (window) {
 		orientation: (_Utils_cmp(window.width, window.height) < 0) ? $mdgriffith$elm_ui$Element$Portrait : $mdgriffith$elm_ui$Element$Landscape
 	};
 };
-var $author$project$Ports$send = _Platform_outgoingPort(
-	'send',
+var $author$project$Ports$elmToJs = _Platform_outgoingPort(
+	'elmToJs',
 	function ($) {
 		var a = $.a;
 		var b = $.b;
@@ -11064,6 +11064,7 @@ var $author$project$Ports$send = _Platform_outgoingPort(
 					$elm$core$Basics$identity(b)
 				]));
 	});
+var $author$project$Ports$send = $author$project$Ports$elmToJs;
 var $author$project$Ports$LocalStorage$request = function (_v0) {
 	var key = _v0.a;
 	return $author$project$Ports$send(
@@ -11214,86 +11215,22 @@ var $author$project$Main$storage = $author$project$Ports$LocalStorage$config(
 var $author$project$Main$init = function (flags) {
 	return _Utils_Tuple2(
 		{
-			device: $mdgriffith$elm_ui$Element$classifyDevice(flags.screen),
+			device: $mdgriffith$elm_ui$Element$classifyDevice(flags),
 			inputValue: $elm$core$Maybe$Nothing,
 			items: _List_Nil
 		},
 		$author$project$Ports$LocalStorage$request($author$project$Main$storage));
 };
-var $author$project$Main$Noop = {$: 'Noop'};
+var $author$project$Main$OnBadPortMsg = function (a) {
+	return {$: 'OnBadPortMsg', a: a};
+};
 var $author$project$Main$OnDeviceResize = function (a) {
 	return {$: 'OnDeviceResize', a: a};
 };
 var $author$project$Main$OnLocalStorageLoad = function (a) {
 	return {$: 'OnLocalStorageLoad', a: a};
 };
-var $elm$json$Json$Decode$index = _Json_decodeIndex;
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$Ports$listen = _Platform_incomingPort(
-	'listen',
-	A2(
-		$elm$json$Json$Decode$andThen,
-		function (_v0) {
-			return A2(
-				$elm$json$Json$Decode$andThen,
-				function (_v1) {
-					return $elm$json$Json$Decode$succeed(
-						_Utils_Tuple2(_v0, _v1));
-				},
-				A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$value));
-		},
-		A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$string)));
-var $author$project$Ports$asSubscriptions = function (_v0) {
-	var noop = _v0.a;
-	var listeners = _v0.b;
-	return $author$project$Ports$listen(
-		function (_v1) {
-			var msg = _v1.a;
-			var value = _v1.b;
-			var _v2 = A2($elm$core$Dict$get, msg, listeners);
-			if (_v2.$ === 'Just') {
-				var listener = _v2.a;
-				return listener(value);
-			} else {
-				return noop;
-			}
-		});
-};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $author$project$Ports$Listeners = F2(
-	function (a, b) {
-		return {$: 'Listeners', a: a, b: b};
-	});
-var $author$project$Ports$noopListener = function (noop) {
-	return A2($author$project$Ports$Listeners, noop, $elm$core$Dict$empty);
-};
-var $elm$browser$Browser$Events$Window = {$: 'Window'};
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 'MySub', a: a, b: b, c: c};
-	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {pids: pids, subs: subs};
-	});
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (node.$ === 'Document') {
-		return 'd_';
-	} else {
-		return 'w_';
-	}
-};
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
 var $elm$core$Dict$fromList = function (assocs) {
 	return A3(
 		$elm$core$List$foldl,
@@ -11306,252 +11243,38 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$core$Dict$merge = F6(
-	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
-		var stepState = F3(
-			function (rKey, rValue, _v0) {
-				stepState:
-				while (true) {
-					var list = _v0.a;
-					var result = _v0.b;
-					if (!list.b) {
-						return _Utils_Tuple2(
-							list,
-							A3(rightStep, rKey, rValue, result));
-					} else {
-						var _v2 = list.a;
-						var lKey = _v2.a;
-						var lValue = _v2.b;
-						var rest = list.b;
-						if (_Utils_cmp(lKey, rKey) < 0) {
-							var $temp$rKey = rKey,
-								$temp$rValue = rValue,
-								$temp$_v0 = _Utils_Tuple2(
-								rest,
-								A3(leftStep, lKey, lValue, result));
-							rKey = $temp$rKey;
-							rValue = $temp$rValue;
-							_v0 = $temp$_v0;
-							continue stepState;
-						} else {
-							if (_Utils_cmp(lKey, rKey) > 0) {
-								return _Utils_Tuple2(
-									list,
-									A3(rightStep, rKey, rValue, result));
-							} else {
-								return _Utils_Tuple2(
-									rest,
-									A4(bothStep, lKey, lValue, rValue, result));
-							}
-						}
-					}
-				}
-			});
-		var _v3 = A3(
-			$elm$core$Dict$foldl,
-			stepState,
-			_Utils_Tuple2(
-				$elm$core$Dict$toList(leftDict),
-				initialResult),
-			rightDict);
-		var leftovers = _v3.a;
-		var intermediateResult = _v3.b;
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v4, result) {
-					var k = _v4.a;
-					var v = _v4.b;
-					return A3(leftStep, k, v, result);
-				}),
-			intermediateResult,
-			leftovers);
-	});
-var $elm$browser$Browser$Events$Event = F2(
-	function (key, event) {
-		return {event: event, key: key};
-	});
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$browser$Browser$Events$spawn = F3(
-	function (router, key, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var actualNode = function () {
-			if (node.$ === 'Document') {
-				return _Browser_doc;
-			} else {
-				return _Browser_window;
-			}
-		}();
-		return A2(
-			$elm$core$Task$map,
-			function (value) {
-				return _Utils_Tuple2(key, value);
-			},
-			A3(
-				_Browser_on,
-				actualNode,
-				name,
-				function (event) {
-					return A2(
-						$elm$core$Platform$sendToSelf,
-						router,
-						A2($elm$browser$Browser$Events$Event, key, event));
-				}));
-	});
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
-	});
-var $elm$browser$Browser$Events$onEffects = F3(
-	function (router, subs, state) {
-		var stepRight = F3(
-			function (key, sub, _v6) {
-				var deads = _v6.a;
-				var lives = _v6.b;
-				var news = _v6.c;
-				return _Utils_Tuple3(
-					deads,
-					lives,
-					A2(
-						$elm$core$List$cons,
-						A3($elm$browser$Browser$Events$spawn, router, key, sub),
-						news));
-			});
-		var stepLeft = F3(
-			function (_v4, pid, _v5) {
-				var deads = _v5.a;
-				var lives = _v5.b;
-				var news = _v5.c;
-				return _Utils_Tuple3(
-					A2($elm$core$List$cons, pid, deads),
-					lives,
-					news);
-			});
-		var stepBoth = F4(
-			function (key, pid, _v2, _v3) {
-				var deads = _v3.a;
-				var lives = _v3.b;
-				var news = _v3.c;
-				return _Utils_Tuple3(
-					deads,
-					A3($elm$core$Dict$insert, key, pid, lives),
-					news);
-			});
-		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
-		var _v0 = A6(
-			$elm$core$Dict$merge,
-			stepLeft,
-			stepBoth,
-			stepRight,
-			state.pids,
-			$elm$core$Dict$fromList(newSubs),
-			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
-		var deadPids = _v0.a;
-		var livePids = _v0.b;
-		var makeNewPids = _v0.c;
-		return A2(
-			$elm$core$Task$andThen,
-			function (pids) {
-				return $elm$core$Task$succeed(
-					A2(
-						$elm$browser$Browser$Events$State,
-						newSubs,
-						A2(
-							$elm$core$Dict$union,
-							livePids,
-							$elm$core$Dict$fromList(pids))));
-			},
-			A2(
-				$elm$core$Task$andThen,
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Ports$jsToElm = _Platform_incomingPort(
+	'jsToElm',
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (_v0) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
 				function (_v1) {
-					return $elm$core$Task$sequence(makeNewPids);
+					return $elm$json$Json$Decode$succeed(
+						_Utils_Tuple2(_v0, _v1));
 				},
-				$elm$core$Task$sequence(
-					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
-	});
-var $elm$browser$Browser$Events$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var key = _v0.key;
-		var event = _v0.event;
-		var toMessage = function (_v2) {
-			var subKey = _v2.a;
-			var _v3 = _v2.b;
-			var node = _v3.a;
-			var name = _v3.b;
-			var decoder = _v3.c;
-			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+				A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$value));
+		},
+		A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$string)));
+var $author$project$Ports$listen = F2(
+	function (onBadMsg, listeners) {
+		var callbacks = $elm$core$Dict$fromList(listeners);
+		var router = function (_v0) {
+			var msg = _v0.a;
+			var value = _v0.b;
+			var _v1 = A2($elm$core$Dict$get, msg, callbacks);
+			if (_v1.$ === 'Just') {
+				var callback = _v1.a;
+				return callback(value);
+			} else {
+				return onBadMsg(msg);
+			}
 		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$map,
-					$elm$core$Platform$sendToApp(router),
-					messages)));
+		return $author$project$Ports$jsToElm(router);
 	});
-var $elm$browser$Browser$Events$subMap = F2(
-	function (func, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var decoder = _v0.c;
-		return A3(
-			$elm$browser$Browser$Events$MySub,
-			node,
-			name,
-			A2($elm$json$Json$Decode$map, func, decoder));
-	});
-_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
-var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
-var $elm$browser$Browser$Events$on = F3(
-	function (node, name, decoder) {
-		return $elm$browser$Browser$Events$subscription(
-			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
-	});
-var $elm$browser$Browser$Events$onResize = function (func) {
-	return A3(
-		$elm$browser$Browser$Events$on,
-		$elm$browser$Browser$Events$Window,
-		'resize',
-		A2(
-			$elm$json$Json$Decode$field,
-			'target',
-			A3(
-				$elm$json$Json$Decode$map2,
-				func,
-				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
-				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
-};
 var $elm$core$Basics$composeR = F3(
 	function (f, g, x) {
 		return g(
@@ -11567,15 +11290,6 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
-var $author$project$Ports$register = F3(
-	function (msg, listener, _v0) {
-		var noop = _v0.a;
-		var listeners = _v0.b;
-		return A2(
-			$author$project$Ports$Listeners,
-			noop,
-			A3($elm$core$Dict$insert, msg, listener, listeners));
-	});
 var $author$project$Ports$LocalStorage$Found = function (a) {
 	return {$: 'Found', a: a};
 };
@@ -11601,35 +11315,60 @@ var $author$project$Ports$LocalStorage$toStorageResult = function (result) {
 			$author$project$Ports$LocalStorage$JsonError(err));
 	}
 };
-var $author$project$Ports$LocalStorage$register = F3(
-	function (handler, _v0, listeners) {
+var $author$project$Ports$LocalStorage$listener = F2(
+	function (handler, _v0) {
 		var key = _v0.a;
 		var decoder = _v0.c;
-		var listener = A2(
+		var callback = A2(
 			$elm$core$Basics$composeR,
 			$elm$json$Json$Decode$decodeValue(
 				$elm$json$Json$Decode$maybe(decoder)),
 			A2($elm$core$Basics$composeR, $author$project$Ports$LocalStorage$toStorageResult, handler));
-		return A3($author$project$Ports$register, 'Ports.LocalStorage.listen.' + key, listener, listeners);
+		return _Utils_Tuple2('Ports.LocalStorage.listen.' + key, callback);
 	});
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $author$project$Ports$Device$Screen = F2(
+	function (width, height) {
+		return {height: height, width: width};
+	});
+var $author$project$Ports$Device$screenDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Ports$Device$Screen,
+	A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+var $author$project$Ports$Device$onResize = function (handler) {
+	return _Utils_Tuple2(
+		'Ports.Device.onResize',
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$json$Json$Decode$decodeValue($author$project$Ports$Device$screenDecoder),
+			A2(
+				$elm$core$Basics$composeR,
+				$elm$core$Result$map($mdgriffith$elm_ui$Element$classifyDevice),
+				handler)));
+};
 var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
-				$author$project$Ports$asSubscriptions(
-				A3(
-					$author$project$Ports$LocalStorage$register,
-					$author$project$Main$OnLocalStorageLoad,
-					$author$project$Main$storage,
-					$author$project$Ports$noopListener($author$project$Main$Noop))),
-				$elm$browser$Browser$Events$onResize(
-				F2(
-					function (w, h) {
-						return $author$project$Main$OnDeviceResize(
-							$elm$core$Result$Ok(
-								$mdgriffith$elm_ui$Element$classifyDevice(
-									{height: h, width: w})));
-					}))
+				A2(
+				$author$project$Ports$listen,
+				$author$project$Main$OnBadPortMsg,
+				_List_fromArray(
+					[
+						A2($author$project$Ports$LocalStorage$listener, $author$project$Main$OnLocalStorageLoad, $author$project$Main$storage),
+						$author$project$Ports$Device$onResize($author$project$Main$OnDeviceResize)
+					]))
 			]));
 };
 var $author$project$Util$andThenCompareWith = F4(
@@ -12047,8 +11786,11 @@ var $author$project$Main$updateInput = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'Noop':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'OnBadPortMsg':
+				var badMsg = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Ports$Log$string('ELM received junk msg from JS: ' + badMsg));
 			case 'OnInputChange':
 				var string = msg.a;
 				return _Utils_Tuple2(
@@ -13214,11 +12956,9 @@ var $author$project$Main$importanceBadge = F2(
 		var text = _v0.b;
 		return A2(
 			$author$project$Main$badge,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$author$project$Element$Extra$backgroundColor(color)
-					]),
+			A2(
+				$elm$core$List$cons,
+				$author$project$Element$Extra$backgroundColor(color),
 				attrs),
 			text);
 	});
@@ -13261,11 +13001,9 @@ var $author$project$Main$urgencyBadge = F2(
 		var text = _v0.b;
 		return A2(
 			$author$project$Main$badge,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$author$project$Element$Extra$backgroundColor(color)
-					]),
+			A2(
+				$elm$core$List$cons,
+				$author$project$Element$Extra$backgroundColor(color),
 				attrs),
 			text);
 	});
@@ -14196,11 +13934,9 @@ var $mdgriffith$elm_ui$Element$minimum = F2(
 var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
 var $author$project$Main$detailsBadge = function (attrs) {
 	return $author$project$Main$badge(
-		_Utils_ap(
-			_List_fromArray(
-				[
-					$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$blue)
-				]),
+		A2(
+			$elm$core$List$cons,
+			$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$blue),
 			attrs));
 };
 var $author$project$Main$TriggerRemoveItem = function (a) {
@@ -14262,6 +13998,7 @@ var $author$project$Main$renderItem = function (item) {
 				$author$project$Main$removeButton(item)
 			]));
 };
+var $author$project$Main$title = 'Todo App';
 var $author$project$Main$desktop = function (model) {
 	return {
 		attributes: _List_fromArray(
@@ -14292,7 +14029,7 @@ var $author$project$Main$desktop = function (model) {
 			[
 				$mdgriffith$elm_ui$Element$focusStyle($author$project$Main$focusStyle)
 			]),
-		title: 'Todo App'
+		title: $author$project$Main$title
 	};
 };
 var $author$project$Main$mobileAddButton = A2(
@@ -14402,16 +14139,193 @@ var $mdgriffith$elm_ui$Element$paragraph = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $author$project$Element$Extra$css = $elm$core$List$map(
+	function (_v0) {
+		var name = _v0.a;
+		var value = _v0.b;
+		return $mdgriffith$elm_ui$Element$htmlAttribute(
+			A2($elm$html$Html$Attributes$style, name, value));
+	});
+var $author$project$Main$textWrapCSS = $author$project$Element$Extra$css(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('-ms-word-break', 'break-all'),
+			_Utils_Tuple2('word-break', 'break-all'),
+			_Utils_Tuple2('word-break', 'break-word'),
+			_Utils_Tuple2('-webkit-hyphens', 'auto'),
+			_Utils_Tuple2('-moz-hyphens', 'auto'),
+			_Utils_Tuple2('hyphens', 'auto')
+		]));
+var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
+	function (a, b, c) {
+		return {$: 'Spaced', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, _v0) {
+				var pad = _v0.a;
+				var spacing = _v0.b;
+				return _Utils_Tuple2(
+					function () {
+						if (pad.$ === 'Just') {
+							var x = pad.a;
+							return pad;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
+								var _v3 = attr.b;
+								var name = _v3.a;
+								var t = _v3.b;
+								var r = _v3.c;
+								var b = _v3.d;
+								var l = _v3.e;
+								return $elm$core$Maybe$Just(
+									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}(),
+					function () {
+						if (spacing.$ === 'Just') {
+							var x = spacing.a;
+							return spacing;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
+								var _v6 = attr.b;
+								var name = _v6.a;
+								var x = _v6.b;
+								var y = _v6.c;
+								return $elm$core$Maybe$Just(
+									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}());
+			}),
+		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		attrs);
+};
+var $mdgriffith$elm_ui$Element$wrappedRow = F2(
+	function (attrs, children) {
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
+		var padded = _v0.a;
+		var spaced = _v0.b;
+		if (spaced.$ === 'Nothing') {
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asRow,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							attrs))),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+		} else {
+			var _v2 = spaced.a;
+			var spaceName = _v2.a;
+			var x = _v2.b;
+			var y = _v2.c;
+			var newPadding = function () {
+				if (padded.$ === 'Just') {
+					var _v5 = padded.a;
+					var name = _v5.a;
+					var t = _v5.b;
+					var r = _v5.c;
+					var b = _v5.d;
+					var l = _v5.e;
+					return ((_Utils_cmp(r, (x / 2) | 0) > -1) && (_Utils_cmp(b, (y / 2) | 0) > -1)) ? $elm$core$Maybe$Just(
+						$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: b - ((y / 2) | 0), left: l - ((x / 2) | 0), right: r - ((x / 2) | 0), top: t - ((y / 2) | 0)})) : $elm$core$Maybe$Nothing;
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}();
+			if (newPadding.$ === 'Just') {
+				var pad = newPadding.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asRow,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								_Utils_ap(
+									attrs,
+									_List_fromArray(
+										[pad]))))),
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+			} else {
+				var halfY = -(y / 2);
+				var halfX = -(x / 2);
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asEl,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					attrs,
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+						_List_fromArray(
+							[
+								A4(
+								$mdgriffith$elm_ui$Internal$Model$element,
+								$mdgriffith$elm_ui$Internal$Model$asRow,
+								$mdgriffith$elm_ui$Internal$Model$div,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											A2(
+												$elm$html$Html$Attributes$style,
+												'margin',
+												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Internal$Model$Attr(
+												A2(
+													$elm$html$Html$Attributes$style,
+													'width',
+													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
+											A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_ui$Internal$Model$Attr(
+													A2(
+														$elm$html$Html$Attributes$style,
+														'height',
+														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
+												A2(
+													$elm$core$List$cons,
+													A2(
+														$mdgriffith$elm_ui$Internal$Model$StyleClass,
+														$mdgriffith$elm_ui$Internal$Flag$spacing,
+														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
+													_List_Nil))))),
+								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
+							])));
+			}
+		}
+	});
 var $author$project$Main$renderItemCard = function (item) {
 	var pad = 6;
-	var _v0 = $author$project$Todo$Urgency$getDisplayData(
-		$author$project$Todo$Item$getUrgency(item));
-	var urgencyColor = _v0.a;
-	var urgencyText = _v0.b;
-	var _v1 = $author$project$Todo$Importance$getDisplayData(
-		$author$project$Todo$Item$getImportance(item));
-	var importanceColor = _v1.a;
-	var importanceText = _v1.b;
 	return A2(
 		$mdgriffith$elm_ui$Element$row,
 		_List_fromArray(
@@ -14420,7 +14334,8 @@ var $author$project$Main$renderItemCard = function (item) {
 				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
 				$author$project$Main$rounded,
 				$author$project$Main$shadowStyle,
-				$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$blue)
+				$author$project$Element$Extra$backgroundColor($avh4$elm_color$Color$blue),
+				$mdgriffith$elm_ui$Element$clip
 			]),
 		_List_fromArray(
 			[
@@ -14438,7 +14353,7 @@ var $author$project$Main$renderItemCard = function (item) {
 				_List_fromArray(
 					[
 						A2(
-						$mdgriffith$elm_ui$Element$row,
+						$mdgriffith$elm_ui$Element$wrappedRow,
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
@@ -14457,7 +14372,7 @@ var $author$project$Main$renderItemCard = function (item) {
 							])),
 						A2(
 						$mdgriffith$elm_ui$Element$paragraph,
-						_List_Nil,
+						$author$project$Main$textWrapCSS,
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$text(
@@ -14533,7 +14448,7 @@ var $author$project$Main$mobile = function (model) {
 			[
 				$mdgriffith$elm_ui$Element$focusStyle($author$project$Main$focusStyle)
 			]),
-		title: 'Todo App'
+		title: $author$project$Main$title
 	};
 };
 var $author$project$Main$view = function (model) {
@@ -14551,22 +14466,13 @@ var $author$project$Main$main = $author$project$Element$Extra$document(
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
-		function (screen) {
-			return $elm$json$Json$Decode$succeed(
-				{screen: screen});
-		},
-		A2(
-			$elm$json$Json$Decode$field,
-			'screen',
-			A2(
+		function (width) {
+			return A2(
 				$elm$json$Json$Decode$andThen,
-				function (width) {
-					return A2(
-						$elm$json$Json$Decode$andThen,
-						function (height) {
-							return $elm$json$Json$Decode$succeed(
-								{height: height, width: width});
-						},
-						A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+				function (height) {
+					return $elm$json$Json$Decode$succeed(
+						{height: height, width: width});
 				},
-				A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)))))(0)}});}(this));
+				A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+		},
+		A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)))(0)}});}(this));
