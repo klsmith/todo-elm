@@ -549,7 +549,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Ports.listen OnBadPortMsg
-            [ LocalStorage.listener OnLocalStorageLoad storage
+            [ storage |> LocalStorage.listener OnLocalStorageLoad
             , Device.onResize OnDeviceResize
             ]
         ]
