@@ -1,7 +1,6 @@
 module Todo.Urgency exposing
     ( Urgency(..)
     , compare
-    , getDisplayData
     )
 
 import Color exposing (Color)
@@ -48,25 +47,3 @@ asIndex urg =
 
         Asap ->
             4
-
-
-
--- DISPLAY
-
-
-getDisplayData : Urgency -> ( Color, String )
-getDisplayData urg =
-    case urg of
-        Whenever ->
-            ( Color.darkGreen, "WHENEVER" )
-
-        Eventually ->
-            ( Color.darkYellow, "EVENTUALLY" )
-
-        -- Deadline _ ->
-        --     ( Color.orange, "DEADLINE ???" )
-        Soon ->
-            ( Color.orange, "SOON" )
-
-        Asap ->
-            ( Color.red, "ASAP" )

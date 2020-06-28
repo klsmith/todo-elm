@@ -1,7 +1,6 @@
 module Todo.Importance exposing
     ( Importance(..)
     , compare
-    , getDisplayData
     )
 
 import Color exposing (Color)
@@ -41,20 +40,3 @@ asIndex imp =
 
         Need ->
             2
-
-
-
--- DISPLAY
-
-
-getDisplayData : Importance -> ( Color, String )
-getDisplayData imp =
-    case imp of
-        Need ->
-            ( Color.red, "NEED" )
-
-        Want ->
-            ( Color.orange, "WANT" )
-
-        NoImportance ->
-            ( Color.darkGreen, "NOT IMPORTANT" )

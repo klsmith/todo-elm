@@ -7,6 +7,7 @@ module Element.Extra exposing
     , fontColor
     , mapDocument
     , onEnter
+    , placeholder
     , text
     , toElementColor
     )
@@ -17,6 +18,7 @@ import Element exposing (Attr, Attribute, Element, Option, layoutWith)
 import Element.Background
 import Element.Border
 import Element.Font
+import Element.Input
 import Html.Attributes
 import Html.Events
 import Keyboard.Event exposing (KeyboardEvent, considerKeyboardEvent)
@@ -76,6 +78,11 @@ mapDocument toMsg doc =
 text : List (Attribute msg) -> String -> Element msg
 text attrs string =
     Element.el attrs <| Element.text string
+
+
+placeholder : List (Attribute msg) -> String -> Element.Input.Placeholder msg
+placeholder attrs string =
+    Element.Input.placeholder attrs <| Element.text string
 
 
 fontColor : Color -> Attr decorative msg
