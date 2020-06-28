@@ -2,9 +2,9 @@ module Todo.Save exposing (Format, decoder, deformat, encode, format)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
-import Todo.Importance as Importance exposing (Importance(..))
+import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
-import Todo.Urgency as Urgency exposing (Urgency(..))
+import Todo.Urgency exposing (Urgency(..))
 
 
 type Format

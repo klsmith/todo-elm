@@ -25,17 +25,17 @@ import Element as El
 import Element.Border as ElBr
 import Element.Extra as Elx exposing (Document)
 import Element.Font as Elf
-import Element.Input as Eli exposing (Placeholder)
+import Element.Input as Eli
 import Json.Decode as Decode
 import Ports
 import Ports.Device as Device
 import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
 import Ports.Log as Log
-import Todo.Importance as Importance exposing (Importance(..))
+import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
 import Todo.Parse as Parse
 import Todo.Save as Save
-import Todo.Urgency as Urgency exposing (Urgency(..))
+import Todo.Urgency exposing (Urgency(..))
 import Util exposing (tern)
 
 
@@ -117,8 +117,7 @@ view model =
                 ( _, _ ) ->
                     False
     in
-    { title =
-        "Todo App"
+    { title = "Todo App"
     , options =
         [ El.focusStyle
             { borderColor = Just (Elx.toElementColor lightCharcoal)
@@ -127,189 +126,172 @@ view model =
             }
         ]
     , attributes =
-        [ Elx.backgroundColor darkCharcoal
-        , Elx.fontColor white
-        , Elf.family
-            [ Elf.typeface "Lucida Console"
-            , Elf.typeface "Monaco"
-            , Elf.monospace
-            ]
-        , Elf.size 16
-        ]
-            ++ (if isMobile then
-                    [ El.inFront
-                        (El.el
-                            [ El.padding 8
-                            , El.width El.fill
-                            ]
-                            (El.row
-                                [ shadowStyle
-                                , rounded
-                                , El.width El.fill
-                                ]
-                                [ Eli.text
-                                    ([ Elx.onEnter TriggerAddItem
-                                     , Elx.backgroundColor charcoal
-                                     , El.width (El.fillPortion 5)
-                                     , ElBr.widthEach
-                                        { left = 2
-                                        , top = 2
-                                        , bottom = 2
-                                        , right = 1
-                                        }
-                                     , Elx.borderColor transparent
-                                     , roundLeftSideOnly
-                                     ]
-                                        ++ (model.inputValue
-                                                |> Maybe.map
-                                                    (El.below
-                                                        << renderParsed []
-                                                    )
-                                                |> Maybe.map List.singleton
-                                                |> Maybe.withDefault []
-                                           )
-                                    )
-                                    { onChange = OnInputChange
-                                    , text =
-                                        model.inputValue
-                                            |> Maybe.map Item.getRawText
-                                            |> Maybe.withDefault ""
-                                    , placeholder =
-                                        Just
-                                            (Elx.placeholder []
-                                                "add things to your todo list"
-                                            )
-                                    , label =
-                                        Eli.labelHidden
-                                            "main input text box"
-                                    }
-                                , Eli.button
-                                    [ Elx.backgroundColor darkGreen
-                                    , ElBr.widthEach
-                                        { left = 1
-                                        , top = 2
-                                        , bottom = 2
-                                        , right = 2
-                                        }
-                                    , Elx.borderColor transparent
-                                    , roundRightSideOnly
-                                    , El.width (El.fillPortion 1)
-                                    , El.height El.fill
-                                    , El.focused
-                                        [ Elx.borderColor darkGreen
-                                        , Elx.fontColor darkGreen
-                                        , Elx.backgroundColor darkCharcoal
-                                        ]
-                                    ]
-                                    { onPress = Just TriggerAddItem
-                                    , label =
-                                        Elx.text
-                                            [ El.centerX
-                                            , El.centerY
-                                            , El.paddingXY 8 0
-                                            ]
-                                            "add"
-                                    }
-                                ]
-                            )
-                        )
+        attributes isMobile
+            { base =
+                [ Elx.backgroundColor darkCharcoal
+                , Elx.fontColor white
+                , Elf.family
+                    [ Elf.typeface "Lucida Console"
+                    , Elf.typeface "Monaco"
+                    , Elf.monospace
                     ]
-
-                else
-                    []
-               )
-    , body =
-        if isMobile then
-            El.column
-                [ El.paddingXY 8 70
-                , El.spacing 16
-                , El.width El.fill
+                , Elf.size 16
                 ]
-                (model.items
-                    |> List.map renderItemCard
-                    |> List.reverse
-                )
-
-        else
-            El.column
-                [ El.width El.fill
-                , El.height El.fill
-                , El.spacing 16
+            , mobile =
+                [ El.inFront
+                    (El.el
+                        [ El.padding 8
+                        , El.width El.fill
+                        ]
+                        (inputBox isMobile model)
+                    )
                 ]
-                (El.row
-                    [ El.centerX
-                    , El.centerY
-                    , El.width (El.minimum 480 El.shrink)
-                    , shadowStyle
+            , desktop =
+                []
+            }
+    , body = body isMobile model
+    }
+
+
+attributes :
+    Bool
+    ->
+        { base : List (Attribute Msg)
+        , mobile : List (Attribute Msg)
+        , desktop : List (Attribute Msg)
+        }
+    -> List (Attribute Msg)
+attributes isMobile { base, mobile, desktop } =
+    base ++ (isMobile |> tern ( mobile, desktop ))
+
+
+inputBox : Bool -> Model -> Element Msg
+inputBox isMobile model =
+    let
+        rowAttributes =
+            attributes isMobile
+                { base =
+                    [ shadowStyle
                     , rounded
                     ]
-                    [ Eli.text
-                        ([ Elx.onEnter TriggerAddItem
-                         , Elx.backgroundColor charcoal
-                         , El.width (El.fillPortion 5)
-                         , ElBr.widthEach
-                            { left = 2
-                            , top = 2
-                            , bottom = 2
-                            , right = 1
-                            }
-                         , Elx.borderColor transparent
-                         , roundLeftSideOnly
-                         ]
-                            ++ (model.inputValue
-                                    |> Maybe.map (El.onLeft << renderParsed [])
-                                    |> Maybe.map List.singleton
-                                    |> Maybe.withDefault []
-                               )
-                        )
-                        { onChange = OnInputChange
-                        , text =
-                            model.inputValue
-                                |> Maybe.map Item.getRawText
-                                |> Maybe.withDefault ""
-                        , placeholder =
-                            Just
-                                (Elx.placeholder []
-                                    "add things to your todo list"
-                                )
-                        , label =
-                            Eli.labelHidden
-                                "main input text box"
-                        }
-                    , Eli.button
-                        [ Elx.backgroundColor darkGreen
-                        , ElBr.widthEach
-                            { left = 1
-                            , top = 2
-                            , bottom = 2
-                            , right = 2
-                            }
-                        , Elx.borderColor transparent
-                        , roundRightSideOnly
-                        , El.width (El.fillPortion 1)
-                        , El.height El.fill
-                        , El.focused
-                            [ Elx.borderColor darkGreen
-                            , Elx.fontColor darkGreen
-                            , Elx.backgroundColor darkCharcoal
-                            ]
-                        ]
-                        { onPress = Just TriggerAddItem
-                        , label =
-                            Elx.text
-                                [ El.centerX
-                                , El.centerY
-                                , El.paddingXY 8 0
-                                ]
-                                "add"
-                        }
+                , mobile =
+                    [ El.width El.fill
                     ]
-                    :: (model.items
-                            |> List.map renderItem
-                            |> List.reverse
+                , desktop =
+                    [ El.width (El.minimum 480 El.shrink)
+                    , El.centerX
+                    , El.centerY
+                    ]
+                }
+
+        renderDirection =
+            isMobile |> tern ( El.below, El.onLeft )
+
+        textBox =
+            Eli.text
+                ([ Elx.onEnter TriggerAddItem
+                 , Elx.backgroundColor charcoal
+                 , Elx.borderColor transparent
+                 , El.width (El.fillPortion 5)
+                 , roundLeftSideOnly
+                 , ElBr.widthEach
+                    { left = 2
+                    , top = 2
+                    , bottom = 2
+                    , right = 1
+                    }
+                 ]
+                    ++ (model.inputValue
+                            |> Maybe.map (renderDirection << renderParsed [])
+                            |> Maybe.map List.singleton
+                            |> Maybe.withDefault []
                        )
                 )
-    }
+                { onChange = OnInputChange
+                , text =
+                    model.inputValue
+                        |> Maybe.map Item.getRawText
+                        |> Maybe.withDefault ""
+                , placeholder =
+                    Just
+                        (Elx.placeholder []
+                            "add things to your todo list"
+                        )
+                , label =
+                    Eli.labelHidden
+                        "main input text box"
+                }
+
+        addButton =
+            Eli.button
+                [ Elx.backgroundColor darkGreen
+                , Elx.borderColor transparent
+                , roundRightSideOnly
+                , El.width (El.fillPortion 1)
+                , El.height El.fill
+                , ElBr.widthEach
+                    { left = 1
+                    , top = 2
+                    , bottom = 2
+                    , right = 2
+                    }
+                , El.focused
+                    [ Elx.borderColor darkGreen
+                    , Elx.fontColor darkGreen
+                    , Elx.backgroundColor darkCharcoal
+                    ]
+                ]
+                { onPress = Just TriggerAddItem
+                , label =
+                    Elx.text
+                        [ El.centerX
+                        , El.centerY
+                        , El.paddingXY 8 0
+                        ]
+                        "add"
+                }
+    in
+    El.row rowAttributes
+        [ textBox
+        , addButton
+        ]
+
+
+body : Bool -> Model -> Element Msg
+body isMobile model =
+    let
+        columnAttributes =
+            attributes isMobile
+                { base =
+                    [ El.spacing 16
+                    ]
+                , mobile =
+                    [ El.paddingXY 8 70
+                    , El.width El.fill
+                    ]
+                , desktop =
+                    [ El.width El.fill
+                    , El.height El.fill
+                    ]
+                }
+
+        itemRenderer =
+            isMobile |> tern ( renderItemCard, renderItem )
+
+        renderedItems =
+            model.items
+                |> List.map itemRenderer
+                |> List.reverse
+
+        rows =
+            if isMobile then
+                renderedItems
+
+            else
+                inputBox isMobile model
+                    :: renderedItems
+    in
+    El.column columnAttributes rows
 
 
 renderItemCard : Item -> Element Msg
@@ -416,13 +398,13 @@ renderItem item =
 
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
-renderParsed attributes item =
+renderParsed attrs item =
     El.row
         ([ El.paddingXY 8 0
          , El.spacing 8
          , El.height El.fill
          ]
-            ++ attributes
+            ++ attrs
         )
         [ importanceBadge [ shadowStyle ] (Item.getImportance item)
         , urgencyBadge [ shadowStyle ] (Item.getUrgency item)

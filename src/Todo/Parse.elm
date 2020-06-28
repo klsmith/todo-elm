@@ -3,9 +3,9 @@ module Todo.Parse exposing
     , item
     )
 
-import Todo.Importance as Importance exposing (Importance(..))
+import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
-import Todo.Urgency as Urgency exposing (Urgency(..))
+import Todo.Urgency exposing (Urgency(..))
 
 
 

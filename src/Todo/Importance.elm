@@ -3,12 +3,6 @@ module Todo.Importance exposing
     , compare
     )
 
-import Color exposing (Color)
-import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode exposing (Value)
-
-
-
 -- TYPES
 
 

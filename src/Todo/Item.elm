@@ -9,8 +9,6 @@ module Todo.Item exposing
     , getUrgency
     )
 
-import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode exposing (Value)
 import Todo.Importance as Importance exposing (Importance(..))
 import Todo.Urgency as Urgency exposing (Urgency(..))
 import Util exposing (andThenCompareWith)
