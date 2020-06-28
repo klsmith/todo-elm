@@ -16,10 +16,8 @@
     var elmApp = Elm.Main.init({
       node: document.getElementById('app'),
       flags: {
-        screen: {
-          width: window.screen.width,
-          height: window.screen.height
-        }
+        width: window.screen.width,
+        height: window.screen.height
       }
     });
     addPorts(elmApp);
