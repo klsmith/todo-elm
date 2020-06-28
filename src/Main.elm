@@ -13,8 +13,8 @@ import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
 import Ports.Log as Log
 import Todo.Importance as Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
+import Todo.Parse as Parse
 import Todo.Save as Save
-import Todo.Token exposing (Token(..))
 import Todo.Urgency as Urgency exposing (Urgency(..))
 import Util exposing (tern)
 
@@ -46,7 +46,7 @@ init flags =
       , items = []
       , device = El.classifyDevice flags
       }
-    , LocalStorage.request storage
+    , LocalStorage.requestLoad storage
     )
 
 
@@ -549,7 +549,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Ports.listen OnBadPortMsg
-            [ storage |> LocalStorage.listener OnLocalStorageLoad
+            [ LocalStorage.onLoad OnLocalStorageLoad storage
             , Device.onResize OnDeviceResize
             ]
         ]
@@ -624,7 +624,9 @@ update msg model =
             )
 
         OnDeviceResize (Ok device) ->
-            ( { model | device = device }, Cmd.none )
+            ( { model | device = device }
+            , Cmd.none
+            )
 
         OnDeviceResize (Err err) ->
             ( model
@@ -649,7 +651,7 @@ updateInput string model =
     -- that's my secret... I'M ALWAYS PARSING!
     -- no, but really, this is what lets us have all the dynamic
     -- updates to the screen while typing!
-    { model | inputValue = Item.parse string }
+    { model | inputValue = Parse.item string }
 
 
 addItemFromInput : Model -> Model
@@ -684,8 +686,12 @@ resetInput model =
 
 removeItem : Item -> Model -> Model
 removeItem item model =
-    -- only allows items that do NOT match the given item through the filter
-    { model | items = model.items |> List.filter (not << Item.equals item) }
+    let
+        -- only allows items that do NOT match the given item through the filter
+        newItems =
+            model.items |> List.filter (not << Item.equals item)
+    in
+    { model | items = newItems }
 
 
 

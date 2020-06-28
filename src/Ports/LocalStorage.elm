@@ -3,8 +3,8 @@ module Ports.LocalStorage exposing
     , Error(..)
     , StorageResult(..)
     , config
-    , listener
-    , request
+    , onLoad
+    , requestLoad
     , save
     )
 
@@ -60,13 +60,13 @@ save value (Config key encoder _) =
         )
 
 
-request : Config a -> Cmd msg
-request (Config key _ _) =
+requestLoad : Config a -> Cmd msg
+requestLoad (Config key _ _) =
     Ports.send ( "Ports.LocalStorage.request", Encode.string key )
 
 
-listener : (StorageResult a -> msg) -> Config a -> Ports.Listener msg
-listener handler (Config key _ decoder) =
+onLoad : (StorageResult a -> msg) -> Config a -> Ports.Listener msg
+onLoad handler (Config key _ decoder) =
     let
         callback =
             Decode.decodeValue (Decode.maybe decoder)

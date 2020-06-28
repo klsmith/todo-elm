@@ -1,10 +1,7 @@
 module Todo.Urgency exposing
     ( Urgency(..)
     , compare
-    , decoder
-    , encode
     , getDisplayData
-    , parse
     )
 
 import Color exposing (Color)
@@ -13,7 +10,7 @@ import Json.Encode as Encode exposing (Value)
 
 
 
--- import Time exposing (Posix)
+-- TYPES
 
 
 type Urgency
@@ -24,44 +21,8 @@ type Urgency
     | Asap
 
 
-encode : Urgency -> Value
-encode urgency =
-    case urgency of
-        Whenever ->
-            Encode.string "Whenever"
 
-        Eventually ->
-            Encode.string "Eventually"
-
-        Soon ->
-            Encode.string "Soon"
-
-        Asap ->
-            Encode.string "Asap"
-
-
-decoder : Decoder Urgency
-decoder =
-    Decode.string |> Decode.andThen decoderFromString
-
-
-decoderFromString : String -> Decoder Urgency
-decoderFromString string =
-    case string of
-        "Whenever" ->
-            Decode.succeed Whenever
-
-        "Eventually" ->
-            Decode.succeed Eventually
-
-        "Soon" ->
-            Decode.succeed Soon
-
-        "Asap" ->
-            Decode.succeed Asap
-
-        _ ->
-            Decode.fail ("Unrecognized Urgency Value: " ++ string)
+-- COMPARISONS
 
 
 compare : Urgency -> Urgency -> Order
@@ -89,6 +50,10 @@ asIndex urg =
             4
 
 
+
+-- DISPLAY
+
+
 getDisplayData : Urgency -> ( Color, String )
 getDisplayData urg =
     case urg of
@@ -105,26 +70,3 @@ getDisplayData urg =
 
         Asap ->
             ( Color.red, "ASAP" )
-
-
-parse : String -> Maybe Urgency
-parse string =
-    case
-        string
-            |> String.filter Char.isAlphaNum
-            |> String.toUpper
-    of
-        "ASAP" ->
-            Just Asap
-
-        "SOON" ->
-            Just Soon
-
-        "EVENTUALLY" ->
-            Just Eventually
-
-        "WHENEVER" ->
-            Just Whenever
-
-        _ ->
-            Nothing
