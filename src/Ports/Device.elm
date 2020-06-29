@@ -13,11 +13,11 @@ type alias Screen =
 
 onResize : (Result Decode.Error Element.Device -> msg) -> Ports.Listener msg
 onResize handler =
-    ( "Ports.Device.onResize"
-    , Decode.decodeValue screenDecoder
-        >> Result.map Element.classifyDevice
-        >> handler
-    )
+    Ports.listener
+        { key = "Ports.Device.onResize"
+        , decoder = screenDecoder
+        , callback = Result.map Element.classifyDevice >> handler
+        }
 
 
 screenDecoder : Decoder Screen

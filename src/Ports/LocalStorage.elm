@@ -67,13 +67,11 @@ requestLoad (Config key _ _) =
 
 onLoad : (StorageResult a -> msg) -> Config a -> Ports.Listener msg
 onLoad handler (Config key _ decoder) =
-    let
-        callback =
-            Decode.decodeValue (Decode.maybe decoder)
-                >> toStorageResult
-                >> handler
-    in
-    ( "Ports.LocalStorage.listen." ++ key, callback )
+    Ports.listener
+        { key = "Ports.LocalStorage.listen." ++ key
+        , decoder = Decode.maybe decoder
+        , callback = handler << toStorageResult
+        }
 
 
 toStorageResult : Result Decode.Error (Maybe a) -> StorageResult a

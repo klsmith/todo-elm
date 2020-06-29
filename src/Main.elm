@@ -529,11 +529,9 @@ roundLeftSideOnly =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch
-        [ Ports.listen OnBadPortMsg
-            [ LocalStorage.onLoad OnLocalStorageLoad storage
-            , Responsive.onResize OnLayoutChange
-            ]
+    Ports.listen OnBadPortMsg
+        [ LocalStorage.onLoad OnLocalStorageLoad storage
+        , Responsive.onResize OnLayoutChange
         ]
 
 

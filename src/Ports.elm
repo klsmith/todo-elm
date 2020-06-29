@@ -1,7 +1,7 @@
-port module Ports exposing (JsMsg, Listener, listen, send)
+port module Ports exposing (JsMsg, Listener, listen, listener, send)
 
 import Dict
-import Json.Decode exposing (Value)
+import Json.Decode as Decode exposing (Decoder, Value)
 
 
 
@@ -22,8 +22,8 @@ type alias JsMsg =
     ( String, Value )
 
 
-type alias Listener msg =
-    ( String, Value -> msg )
+type Listener msg
+    = Listener String (Value -> msg)
 
 
 
@@ -35,11 +35,23 @@ send =
     elmToJs
 
 
+listener :
+    { key : String
+    , decoder : Decoder a
+    , callback : Result Decode.Error a -> msg
+    }
+    -> Listener msg
+listener { key, decoder, callback } =
+    Listener key (Decode.decodeValue decoder >> callback)
+
+
 listen : (String -> msg) -> List (Listener msg) -> Sub msg
 listen onBadMsg listeners =
     let
         callbacks =
-            Dict.fromList listeners
+            listeners
+                |> List.map destructListener
+                |> Dict.fromList
 
         router =
             \( msg, value ) ->
@@ -51,3 +63,8 @@ listen onBadMsg listeners =
                         onBadMsg msg
     in
     jsToElm router
+
+
+destructListener : Listener msg -> ( String, Value -> msg )
+destructListener (Listener k c) =
+    ( k, c )
