@@ -17,10 +17,7 @@ import Color
 import Element as El
     exposing
         ( Attribute
-        , Device
-        , DeviceClass(..)
         , Element
-        , Orientation(..)
         )
 import Element.Border as ElBr
 import Element.Extra as Elx exposing (Document)
@@ -31,6 +28,7 @@ import Ports
 import Ports.Device as Device
 import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
 import Ports.Log as Log
+import Responsive exposing (Layout(..))
 import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
 import Todo.Parse as Parse
@@ -46,7 +44,7 @@ import Util exposing (tern)
 type alias Model =
     { inputValue : Maybe Item
     , items : List Item
-    , device : Device
+    , layout : Responsive.Layout
     }
 
 
@@ -64,7 +62,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { inputValue = Nothing
       , items = []
-      , device = El.classifyDevice flags
+      , layout = Responsive.layout flags
       }
     , LocalStorage.requestLoad storage
     )
@@ -104,19 +102,6 @@ shadowStyle =
 
 view : Model -> Document Msg
 view model =
-    let
-        isMobile =
-            case
-                ( model.device.class
-                , model.device.orientation
-                )
-            of
-                ( Phone, Portrait ) ->
-                    True
-
-                ( _, _ ) ->
-                    False
-    in
     { title = "Todo App"
     , options =
         [ El.focusStyle
@@ -126,7 +111,7 @@ view model =
             }
         ]
     , attributes =
-        attributes isMobile
+        attributes model.layout
             { base =
                 [ Elx.backgroundColor darkCharcoal
                 , Elx.fontColor white
@@ -143,33 +128,40 @@ view model =
                         [ El.padding 8
                         , El.width El.fill
                         ]
-                        (inputBox isMobile model)
+                        (inputBox model)
                     )
                 ]
             , desktop =
                 []
             }
-    , body = body isMobile model
+    , body = body model
     }
 
 
 attributes :
-    Bool
+    Layout
     ->
         { base : List (Attribute Msg)
         , mobile : List (Attribute Msg)
         , desktop : List (Attribute Msg)
         }
     -> List (Attribute Msg)
-attributes isMobile { base, mobile, desktop } =
-    base ++ (isMobile |> tern ( mobile, desktop ))
+attributes layout { base, mobile, desktop } =
+    base
+        ++ (case layout of
+                Mobile ->
+                    mobile
+
+                Desktop ->
+                    desktop
+           )
 
 
-inputBox : Bool -> Model -> Element Msg
-inputBox isMobile model =
+inputBox : Model -> Element Msg
+inputBox model =
     let
         rowAttributes =
-            attributes isMobile
+            attributes model.layout
                 { base =
                     [ shadowStyle
                     , rounded
@@ -185,7 +177,12 @@ inputBox isMobile model =
                 }
 
         renderDirection =
-            isMobile |> tern ( El.below, El.onLeft )
+            case model.layout of
+                Mobile ->
+                    El.below
+
+                Desktop ->
+                    El.onLeft
 
         textBox =
             Eli.text
@@ -257,11 +254,11 @@ inputBox isMobile model =
         ]
 
 
-body : Bool -> Model -> Element Msg
-body isMobile model =
+body : Model -> Element Msg
+body model =
     let
         columnAttributes =
-            attributes isMobile
+            attributes model.layout
                 { base =
                     [ El.spacing 16
                     ]
@@ -275,126 +272,131 @@ body isMobile model =
                     ]
                 }
 
-        itemRenderer =
-            isMobile |> tern ( renderItemCard, renderItem )
-
         renderedItems =
             model.items
-                |> List.map itemRenderer
+                |> List.map (renderItem model.layout)
                 |> List.reverse
 
         rows =
-            if isMobile then
-                renderedItems
+            case model.layout of
+                Mobile ->
+                    renderedItems
 
-            else
-                inputBox isMobile model
-                    :: renderedItems
+                Desktop ->
+                    inputBox model
+                        :: renderedItems
     in
     El.column columnAttributes rows
 
 
-renderItemCard : Item -> Element Msg
-renderItemCard item =
+renderItem : Layout -> Item -> Element Msg
+renderItem layout item =
     let
+        removeButton =
+            Eli.button
+                (attributes layout
+                    { base =
+                        [ Elx.backgroundColor red
+                        , Elx.borderColor transparent
+                        , ElBr.width 2
+                        , El.focused
+                            [ Elx.borderColor red
+                            , Elx.fontColor red
+                            , Elx.backgroundColor darkCharcoal
+                            ]
+                        ]
+                    , mobile =
+                        [ El.width (El.fillPortion 1)
+                        , El.height El.fill
+                        , roundEach
+                            { topRight = True
+                            , bottomRight = True
+                            , bottomLeft = False
+                            , topLeft = False
+                            }
+                        ]
+                    , desktop =
+                        [ ElBr.rounded 2
+                        , El.paddingXY 4 0
+                        , shadowStyle
+                        ]
+                    }
+                )
+                { onPress = Just (TriggerRemoveItem item)
+                , label =
+                    Elx.text
+                        [ El.centerX
+                        , El.centerY
+                        ]
+                        "X"
+                }
+
         pad =
             6
+
+        columns =
+            case layout of
+                Mobile ->
+                    [ El.column
+                        [ El.width (El.fillPortion 6)
+                        , El.padding pad
+                        , El.spacing pad
+                        , roundEach
+                            { topLeft = True
+                            , bottomLeft = True
+                            , topRight = False
+                            , bottomRight = False
+                            }
+                        ]
+                        [ El.wrappedRow [ El.width El.fill, El.spacing pad ]
+                            [ importanceBadge [] (Item.getImportance item)
+                            , urgencyBadge [] (Item.getUrgency item)
+                            ]
+                        , El.paragraph
+                            (Elx.css
+                                [ ( "-ms-word-break", "break-all" )
+                                , ( "word-break", "break-all" )
+                                , ( "word-break", "break-word" )
+                                , ( "-webkit-hyphens", "auto" )
+                                , ( "-moz-hyphens", "auto" )
+                                , ( "hyphens", "auto" )
+                                ]
+                            )
+                            [ El.text
+                                (Item.getDetails item)
+                            ]
+                        ]
+                    , removeButton
+                    ]
+
+                Desktop ->
+                    [ importanceBadge [ shadowStyle ] (Item.getImportance item)
+                    , urgencyBadge [ shadowStyle ] (Item.getUrgency item)
+                    , detailsBadge [ shadowStyle ] (Item.getDetails item)
+                    , removeButton
+                    ]
     in
     El.row
-        [ El.width El.fill
-        , El.height El.shrink
-        , rounded
-        , shadowStyle
-        , Elx.backgroundColor blue
-        , El.clip
-        ]
-        [ El.column
-            [ El.width (El.fillPortion 6)
-            , El.padding pad
-            , El.spacing pad
-            , roundEach
-                { topLeft = True
-                , bottomLeft = True
-                , topRight = False
-                , bottomRight = False
-                }
-            ]
-            [ El.wrappedRow [ El.width El.fill, El.spacing pad ]
-                [ importanceBadge [] (Item.getImportance item)
-                , urgencyBadge [] (Item.getUrgency item)
+        (attributes layout
+            { base = []
+            , mobile =
+                [ El.width El.fill
+                , El.height El.shrink
+                , rounded
+                , shadowStyle
+                , Elx.backgroundColor blue
+                , El.clip
                 ]
-            , El.paragraph
-                (Elx.css
-                    [ ( "-ms-word-break", "break-all" )
-                    , ( "word-break", "break-all" )
-                    , ( "word-break", "break-word" )
-                    , ( "-webkit-hyphens", "auto" )
-                    , ( "-moz-hyphens", "auto" )
-                    , ( "hyphens", "auto" )
-                    ]
-                )
-                [ El.text
-                    (Item.getDetails item)
+            , desktop =
+                [ El.paddingXY 8 0
+                , El.spacing 8
+                , El.centerX
+                , El.centerY
+                , El.width El.shrink
                 ]
-            ]
-        , Eli.button
-            [ El.width (El.fillPortion 1)
-            , El.height El.fill
-            , Elx.backgroundColor red
-            , Elx.borderColor transparent
-            , ElBr.width 2
-            , roundEach
-                { topRight = True
-                , bottomRight = True
-                , bottomLeft = False
-                , topLeft = False
-                }
-            , El.focused
-                [ Elx.borderColor red
-                , Elx.fontColor red
-                , Elx.backgroundColor darkCharcoal
-                ]
-            ]
-            { onPress = Just (TriggerRemoveItem item)
-            , label =
-                Elx.text
-                    [ El.centerX
-                    , El.centerY
-                    ]
-                    "X"
             }
-        ]
-
-
-renderItem : Item -> Element Msg
-renderItem item =
-    El.row
-        [ El.paddingXY 8 0
-        , El.spacing 8
-        , El.centerX
-        , El.centerY
-        , El.width El.shrink
-        ]
-        [ importanceBadge [ shadowStyle ] (Item.getImportance item)
-        , urgencyBadge [ shadowStyle ] (Item.getUrgency item)
-        , detailsBadge [ shadowStyle ] (Item.getDetails item)
-        , Eli.button
-            [ Elx.backgroundColor red
-            , ElBr.rounded 2
-            , ElBr.width 2
-            , Elx.borderColor transparent
-            , El.paddingXY 4 0
-            , shadowStyle
-            , El.focused
-                [ Elx.borderColor red
-                , Elx.fontColor red
-                , Elx.backgroundColor darkCharcoal
-                ]
-            ]
-            { onPress = Just (TriggerRemoveItem item)
-            , label = El.text "X"
-            }
-        ]
+        )
+        columns
 
 
 renderParsed : List (Attribute Msg) -> Item -> Element Msg
@@ -530,7 +532,7 @@ subscriptions _ =
     Sub.batch
         [ Ports.listen OnBadPortMsg
             [ LocalStorage.onLoad OnLocalStorageLoad storage
-            , Device.onResize OnDeviceResize
+            , Responsive.onResize OnLayoutChange
             ]
         ]
 
@@ -545,7 +547,7 @@ type Msg
     | TriggerAddItem
     | TriggerRemoveItem Item
     | OnLocalStorageLoad (StorageResult Save.Format)
-    | OnDeviceResize (Result Decode.Error Device)
+    | OnLayoutChange (Result Decode.Error Responsive.Layout)
 
 
 
@@ -603,12 +605,12 @@ update msg model =
                 )
             )
 
-        OnDeviceResize (Ok device) ->
-            ( { model | device = device }
+        OnLayoutChange (Ok layout) ->
+            ( { model | layout = layout }
             , Cmd.none
             )
 
-        OnDeviceResize (Err err) ->
+        OnLayoutChange (Err err) ->
             ( model
             , Log.string
                 ("Error Resizing Window: "
