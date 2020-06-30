@@ -1,6 +1,7 @@
 module Todo.Importance exposing
     ( Importance(..)
     , compare
+    , toDisplayString
     )
 
 -- TYPES
@@ -34,3 +35,16 @@ asIndex imp =
 
         Need ->
             2
+
+
+toDisplayString : Importance -> String
+toDisplayString imp =
+    case imp of
+        NoImportance ->
+            "NOT IMPORTANT"
+
+        Want ->
+            "WANT"
+
+        Need ->
+            "NEED"

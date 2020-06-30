@@ -1,6 +1,7 @@
 module Todo.Urgency exposing
     ( Urgency(..)
     , compare
+    , toDisplayString
     )
 
 -- TYPES
@@ -41,3 +42,19 @@ asIndex urg =
 
         Asap ->
             4
+
+
+toDisplayString : Urgency -> String
+toDisplayString urg =
+    case urg of
+        Whenever ->
+            "WHENEVER"
+
+        Eventually ->
+            "EVENTUALLY"
+
+        Soon ->
+            "SOON"
+
+        Asap ->
+            "ASAP"
