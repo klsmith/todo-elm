@@ -17,19 +17,22 @@ isolatedImportance =
             (\_ ->
                 "need something"
                     |> Parse.item
-                    |> expectImportance Need
+                    |> Item.getImportance
+                    |> Expect.equal Need
             )
         , Test.test "Want"
             (\_ ->
                 "want something"
                     |> Parse.item
-                    |> expectImportance Want
+                    |> Item.getImportance
+                    |> Expect.equal Want
             )
         , Test.test "No Importance"
             (\_ ->
                 "something"
                     |> Parse.item
-                    |> expectImportance NoImportance
+                    |> Item.getImportance
+                    |> Expect.equal NoImportance
             )
         ]
 
@@ -41,54 +44,55 @@ isolatedUrgency =
             (\_ ->
                 "something asap"
                     |> Parse.item
-                    |> expectUrgency Asap
+                    |> Item.getUrgency
+                    |> Expect.equal Asap
             )
         , Test.test "Soon"
             (\_ ->
                 "something soon"
                     |> Parse.item
-                    |> expectUrgency Soon
+                    |> Item.getUrgency
+                    |> Expect.equal Soon
             )
         , Test.test "Eventually"
             (\_ ->
                 "something eventually"
                     |> Parse.item
-                    |> expectUrgency Eventually
+                    |> Item.getUrgency
+                    |> Expect.equal Eventually
             )
         , Test.test "Whenever"
             (\_ ->
                 "something whenever"
                     |> Parse.item
-                    |> expectUrgency Whenever
+                    |> Item.getUrgency
+                    |> Expect.equal Whenever
             )
         , Test.test "No Urgency"
             (\_ ->
                 "something"
                     |> Parse.item
-                    |> expectUrgency Whenever
+                    |> Item.getUrgency
+                    |> Expect.equal Whenever
             )
         ]
 
 
-expectImportance : Importance -> Maybe Item -> Expectation
-expectImportance =
-    Expect.Extra.has "Item"
-        Item.getImportance
-        Importance.toDisplayString
-
-
-expectUrgency : Urgency -> Maybe Item -> Expectation
-expectUrgency =
-    Expect.Extra.has "Item"
-        Item.getUrgency
-        Urgency.toDisplayString
-
-
-expectEquals : String -> Item -> Maybe Item -> Expectation
-expectEquals failMsg expected actual =
-    actual
-        |> Maybe.map
-            (Item.equals expected
-                >> Expect.true failMsg
+specifics : Test
+specifics =
+    Test.describe "Specific Parse Cases"
+        [ Test.test "Test \"to\" is NOT considered details."
+            (\_ ->
+                "need to do something"
+                    |> Parse.item
+                    |> Item.getDetails
+                    |> Expect.equal "do something"
             )
-        |> Maybe.withDefault (Expect.fail failMsg)
+        , Test.test "Test \"to\" IS considered part of details."
+            (\_ ->
+                "to do something"
+                    |> Parse.item
+                    |> Item.getDetails
+                    |> Expect.equal "to do something"
+            )
+        ]

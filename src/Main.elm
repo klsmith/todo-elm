@@ -42,7 +42,7 @@ import Util exposing (tern)
 
 
 type alias Model =
-    { inputValue : Maybe Item
+    { inputValue : Item
     , items : List Item
     , layout : Responsive.Layout
     }
@@ -60,7 +60,7 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { inputValue = Nothing
+    ( { inputValue = Parse.item ""
       , items = []
       , layout = Responsive.layout flags
       }
@@ -199,16 +199,14 @@ inputBox model =
                     }
                  ]
                     ++ (model.inputValue
-                            |> Maybe.map (renderDirection << renderParsed [])
-                            |> Maybe.map List.singleton
-                            |> Maybe.withDefault []
+                            |> (renderDirection << renderParsed [])
+                            |> List.singleton
                        )
                 )
                 { onChange = OnInputChange
                 , text =
                     model.inputValue
-                        |> Maybe.map Item.getRawText
-                        |> Maybe.withDefault ""
+                        |> Item.getRawText
                 , placeholder =
                     Just
                         (Elx.placeholder []
@@ -636,20 +634,19 @@ updateInput string model =
 
 addItemFromInput : Model -> Model
 addItemFromInput model =
-    case model.inputValue of
-        Just item ->
-            { model
-                | items =
-                    if model.items |> contains item then
-                        model.items
+    let
+        item =
+            model.inputValue
+    in
+    { model
+        | items =
+            if model.items |> contains item then
+                model.items
 
-                    else
-                        List.sortWith Item.compare
-                            (item :: model.items)
-            }
-
-        Nothing ->
-            model
+            else
+                List.sortWith Item.compare
+                    (item :: model.items)
+    }
 
 
 contains : Item -> List Item -> Bool
@@ -659,9 +656,8 @@ contains item =
 
 resetInput : Model -> Model
 resetInput model =
-    -- since we are always parsing on update, we reset this to nothing;
-    -- there is nothing we could parse to populate it accurately.
-    { model | inputValue = Nothing }
+    -- since we are always parsing on update, this is how we empty the input
+    { model | inputValue = Parse.item "" }
 
 
 removeItem : Item -> Model -> Model

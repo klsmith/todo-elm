@@ -12,7 +12,7 @@ import Todo.Urgency exposing (Urgency(..))
 -- PARSING
 
 
-item : String -> Maybe Item
+item : String -> Item
 item string =
     let
         tokens =
@@ -40,13 +40,10 @@ item string =
                 |> String.join " "
     in
     if List.length txts == 1 then
-        Just (Item.create imp urg (String.concat txts) rawText)
-
-    else if String.isEmpty rawText then
-        Nothing
+        Item.create imp urg (String.concat txts) rawText
 
     else
-        Just (Item.create imp urg rawText rawText)
+        Item.create imp urg rawText rawText
 
 
 importance : String -> Maybe Importance
