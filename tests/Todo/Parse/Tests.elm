@@ -15,19 +15,19 @@ isolatedImportance =
     Test.describe "Isolated Importance Tests"
         [ Test.test "Need"
             (\_ ->
-                "need to do something"
+                "need something"
                     |> Parse.item
                     |> expectImportance Need
             )
         , Test.test "Want"
             (\_ ->
-                "want to do something"
+                "want something"
                     |> Parse.item
                     |> expectImportance Want
             )
         , Test.test "No Importance"
             (\_ ->
-                "do something"
+                "something"
                     |> Parse.item
                     |> expectImportance NoImportance
             )
@@ -39,31 +39,31 @@ isolatedUrgency =
     Test.describe "Isolated Urgency Tests"
         [ Test.test "Asap"
             (\_ ->
-                "do something asap"
+                "something asap"
                     |> Parse.item
                     |> expectUrgency Asap
             )
         , Test.test "Soon"
             (\_ ->
-                "do something soon"
+                "something soon"
                     |> Parse.item
                     |> expectUrgency Soon
             )
         , Test.test "Eventually"
             (\_ ->
-                "do something eventually"
+                "something eventually"
                     |> Parse.item
                     |> expectUrgency Eventually
             )
         , Test.test "Whenever"
             (\_ ->
-                "do something whenever"
+                "something whenever"
                     |> Parse.item
                     |> expectUrgency Whenever
             )
         , Test.test "No Urgency"
             (\_ ->
-                "do something"
+                "something"
                     |> Parse.item
                     |> expectUrgency Whenever
             )
