@@ -176,37 +176,40 @@ inputBox model =
                     ]
                 }
 
-        renderDirection =
+        parsedOutput =
             case model.layout of
                 Mobile ->
                     El.below
+                        (renderParsed
+                            [ El.paddingXY 0 16 ]
+                            model.inputValue
+                        )
 
                 Desktop ->
                     El.onLeft
+                        (renderParsed
+                            [ El.paddingXY 16 0 ]
+                            model.inputValue
+                        )
 
         textBox =
             Eli.text
-                ([ Elx.onEnter TriggerAddItem
-                 , Elx.backgroundColor charcoal
-                 , Elx.borderColor transparent
-                 , El.width (El.fillPortion 5)
-                 , roundLeftSideOnly
-                 , ElBr.widthEach
+                [ Elx.onEnter TriggerAddItem
+                , Elx.backgroundColor charcoal
+                , Elx.borderColor transparent
+                , El.width (El.fillPortion 5)
+                , roundLeftSideOnly
+                , ElBr.widthEach
                     { left = 2
                     , top = 2
                     , bottom = 2
                     , right = 1
                     }
-                 ]
-                    ++ (model.inputValue
-                            |> (renderDirection << renderParsed [])
-                            |> List.singleton
-                       )
-                )
+                , parsedOutput
+                ]
                 { onChange = OnInputChange
                 , text =
-                    model.inputValue
-                        |> Item.getRawText
+                    Item.getRawText model.inputValue
                 , placeholder =
                     Just
                         (Elx.placeholder []
