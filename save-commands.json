@@ -1,6 +1,5 @@
 {
   "commands": [
-    "src/** : sh build",
-    "assets/** : sh build"
+    "src/** : npm run build:dev"
   ]
 }
