@@ -1,6 +1,5 @@
 module Todo.Item exposing
     ( Item
-    , compare
     , create
     , equals
     , getDetails
@@ -11,7 +10,6 @@ module Todo.Item exposing
 
 import Todo.Importance as Importance exposing (Importance(..))
 import Todo.Urgency as Urgency exposing (Urgency(..))
-import Util exposing (andThenCompareWith)
 
 
 
@@ -36,23 +34,8 @@ create =
 
 
 equals : Item -> Item -> Bool
-equals itemA itemB =
-    compare itemA itemB == EQ
-
-
-compare : Item -> Item -> Order
-compare itemA itemB =
-    Importance.compare
-        (getImportance itemA)
-        (getImportance itemB)
-        |> andThenCompareWith
-            Urgency.compare
-            (getUrgency itemA)
-            (getUrgency itemB)
-        |> andThenCompareWith
-            Basics.compare
-            (getDetails itemA)
-            (getDetails itemB)
+equals =
+    (==)
 
 
 

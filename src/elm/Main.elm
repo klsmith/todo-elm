@@ -31,6 +31,7 @@ import Ports.Log as Log
 import Responsive exposing (Layout(..))
 import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
+import Todo.Order as Order
 import Todo.Parse as Parse
 import Todo.Save as Save
 import Todo.Urgency exposing (Urgency(..))
@@ -647,7 +648,7 @@ addItemFromInput model =
                 model.items
 
             else
-                List.sortWith Item.compare
+                List.sortWith Order.byItemAscending
                     (item :: model.items)
     }
 
