@@ -53,7 +53,7 @@ function addPorts(elmApp) {
       listeners["Ports.LocalStorage.request"](key);
     };
 
-  /*** SCREEN PORT LOGIC ***/
+  /*** DEVICE PORT LOGIC ***/
   window.addEventListener("resize",
     function() {
       send("Ports.Device.onResize", {

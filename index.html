@@ -3,26 +3,25 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width">
-  <meta name="viewport" content="initial-scale=1.0">
-  <script type="text/javascript" src="app.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript" src="elm.js"></script>
   <script type="text/javascript" src="ports.js"></script>
-</head>
-
-<body>
-  <div id='app'></div>
   <script type="text/javascript">
-    // initialize the elm app
-    var elmApp = Elm.Main.init({
-      node: document.getElementById('app'),
-      flags: {
-        width: window.screen.width,
-        height: window.screen.height
-      }
-    });
-    addPorts(elmApp);
+    window.onload = function() {
+      var elmApp = Elm.Main.init({
+        node: document.getElementById('app'),
+        flags: {
+          width: window.screen.width,
+          height: window.screen.height
+        }
+      });
+      addPorts(elmApp);
+    }
 
   </script>
+</head>
+
+<body id='app'>
 </body>
 
 </html>
