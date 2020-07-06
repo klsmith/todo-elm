@@ -93,11 +93,14 @@ byUrgencyAscending a b =
                 Eventually ->
                     1
 
-                Soon ->
+                Event _ ->
                     3
 
-                Asap ->
+                Soon ->
                     4
+
+                Asap ->
+                    5
     in
     Basics.compare
         (asIndex a)

@@ -3,11 +3,13 @@ module Todo.Urgency exposing
     , toDisplayString
     )
 
+import Time exposing (Posix)
+
 
 type Urgency
     = Whenever
     | Eventually
-      -- | Deadline Posix
+    | Event Posix
     | Soon
     | Asap
 
@@ -20,6 +22,9 @@ toDisplayString urg =
 
         Eventually ->
             "EVENTUALLY"
+
+        Event posix ->
+            "EVENT " ++ (String.fromInt <| Time.posixToMillis <| posix)
 
         Soon ->
             "SOON"

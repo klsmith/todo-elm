@@ -29,6 +29,7 @@ import Ports.Device as Device
 import Ports.LocalStorage as LocalStorage exposing (StorageResult(..))
 import Ports.Log as Log
 import Responsive exposing (Layout(..))
+import Time
 import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
 import Todo.Order as Order
@@ -447,8 +448,9 @@ urgencyBadge attrs urgency =
                 Eventually ->
                     ( darkYellow, "EVENTUALLY" )
 
-                -- Deadline _ ->
-                --     ( orange, "DEADLINE ???" )
+                Event posix ->
+                    ( orange, "EVENT " ++ (String.fromInt <| Time.posixToMillis <| posix) )
+
                 Soon ->
                     ( orange, "SOON" )
 

@@ -2,6 +2,7 @@ module Todo.Save exposing (Format, decoder, deformat, encode, format)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
+import Time
 import Todo.Importance exposing (Importance(..))
 import Todo.Item as Item exposing (Item)
 import Todo.Urgency exposing (Urgency(..))
@@ -71,6 +72,9 @@ urgencyEncoder urgency =
         Eventually ->
             Encode.string "Eventually"
 
+        Event posix ->
+            Encode.int <| Time.posixToMillis posix
+
         Soon ->
             Encode.string "Soon"
 
@@ -129,22 +133,25 @@ importanceDecoder =
 
 urgencyDecoder : Decoder Urgency
 urgencyDecoder =
-    Decode.string
-        |> Decode.andThen
-            (\string ->
-                case string of
-                    "Whenever" ->
-                        Decode.succeed Whenever
+    Decode.oneOf
+        [ Decode.map Event (Decode.map Time.millisToPosix Decode.int)
+        , Decode.string
+            |> Decode.andThen
+                (\string ->
+                    case string of
+                        "Whenever" ->
+                            Decode.succeed Whenever
 
-                    "Eventually" ->
-                        Decode.succeed Eventually
+                        "Eventually" ->
+                            Decode.succeed Eventually
 
-                    "Soon" ->
-                        Decode.succeed Soon
+                        "Soon" ->
+                            Decode.succeed Soon
 
-                    "Asap" ->
-                        Decode.succeed Asap
+                        "Asap" ->
+                            Decode.succeed Asap
 
-                    _ ->
-                        Decode.fail ("Unrecognized Urgency Value: " ++ string)
-            )
+                        _ ->
+                            Decode.fail ("Unrecognized Urgency Value: " ++ string)
+                )
+        ]
